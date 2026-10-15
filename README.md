@@ -1,0 +1,214 @@
+# Restaurant Review Analytics (RRA)
+
+Sistem analitik ulasan pelanggan restoran berbasis **Aspect-Based Sentiment
+Analysis (ABSA)** dengan **ekstraksi frasa keluhan dominan** untuk menghasilkan
+**rekomendasi prioritas perbaikan layanan**.
+
+Repositori ini adalah artefak rekayasa dari skripsi:
+
+> **Rancang Bangun Sistem Analitik Ulasan Pelanggan Restoran Berbasis
+> Aspect-Based Sentiment Analysis dengan Ekstraksi Frasa Keluhan Dominan untuk
+> Rekomendasi Prioritas Perbaikan Layanan**
+
+---
+
+## 1. Masalah yang diselesaikan
+
+Ulasan pelanggan restoran di Google Maps jumlahnya besar, tetapi bagi pemilik
+usaha ia hanya tumpukan teks. Keluaran yang benar-benar dibutuhkan bukan
+sekadar "sentimen positif/negatif", melainkan **urutan hal apa yang harus
+diperbaiki lebih dahulu** beserta alasannya.
+
+Rangkaian penalaran sistem:
+
+```
+ulasan mentah
+  → aspek apa yang dibicarakan          (makanan, pelayanan, harga, suasana, fasilitas)
+  → sentimen tiap aspek                  (positif / negatif / netral)
+  → seberapa parah tiap keluhan          (diturunkan dari rating bintang, bukan dari model)
+  → frasa keluhan yang paling sering     (per aspek, berbasis frekuensi + bobot TF-IDF)
+  → skor prioritas perbaikan             (volume, keparahan, keragaman — eksplisit & dapat diaudit)
+  → rekomendasi tindakan                 (tabel aturan DINESERV, bukan keluaran model)
+```
+
+## 2. Kebaruan yang dibuktikan di repositori ini
+
+Kebaruan penelitian ini **bukan pada algoritmanya** — ABSA dengan SVM/TF-IDF
+pada ulasan restoran Indonesia sudah terbukti (Firdaus dkk., 2024; Nofandi
+dkk., 2023). Kebaruannya ada pada **rekayasa sistem**, dan tiap klaim di bawah
+punya bukti yang dapat dijalankan:
+
+| Klaim kebaruan | Bukti di repositori |
+|---|---|
+| Arsitektur berlapis dengan **kontrak antarmuka tetap** | `src/rra/contracts.py`, `src/rra/models/base.py`, `src/rra/decision/module.py` |
+| **Uji penggantian komponen**: model SVM → Naive Bayes tanpa mengubah satu pun modul lain | `tests/test_modularity.py::test_swapping_model_does_not_touch_other_modules` (sidik jari SHA-256 seluruh berkas `src/rra/**`) |
+| Perbedaan konfigurasi model **hanya satu kunci** | `tests/test_modularity.py::test_config_files_differ_by_one_key_only` (`model.name`) |
+| Modul **skor prioritas eksplisit dan dapat diaudit** | `src/rra/decision/priority.py`, penyimpanan komponen skor di `src/rra/storage/repository.py` |
+| Kinerja **non-fungsional terukur** | `scripts/benchmark.py` → `reports/benchmark.json` |
+| Kesiapan **SUS** untuk evaluasi penerimaan pengguna | berkas kuesioner pada `docs/PENGUJIAN.md` |
+
+Rincian argumentasi, gap penelitian, dan perbandingan dengan penelitian
+terdekat: [`docs/NOVELTY_DAN_GAP.md`](docs/NOVELTY_DAN_GAP.md).
+
+## 3. Pemasangan
+
+```bash
+git clone https://github.com/Badiii098/restaurant-review-analytics.git
+cd restaurant-review-analytics
+
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+export PYTHONPATH=src
+```
+
+Bila memakai [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv venv .venv && uv pip install --python .venv/bin/python -r requirements.txt
+```
+
+## 4. Menjalankan
+
+```bash
+export PYTHONPATH=src
+
+# 1. Data contoh yang dapat diulang (2.000 ulasan, benih 42)
+python -m rra.cli sample-data --n 2000 --seed 42
+
+# 2. Alur end-to-end → CSV, Markdown, dan basis data SQLite
+python -m rra.cli run
+
+# 3. Bandingkan komponen model (validasi silang)
+python -m rra.cli evaluate --folds 10 --compare --out reports/evaluasi.json
+
+# 4. Ukur kinerja non-fungsional
+python -m rra.cli benchmark --repeat 5
+
+# 5. Tampilkan komponen yang terdaftar
+python -m rra.cli models
+```
+
+Antarmuka pengguna:
+
+```bash
+streamlit run app/streamlit_app.py
+```
+
+Berkas keluaran ditulis ke:
+
+| Lokasi | Isi |
+|---|---|
+| `reports/*.csv`, `reports/*.md` | prioritas perbaikan, frasa keluhan, rekomendasi |
+| `reports/evaluasi.json` | kinerja komponen model (F1, Precision@K, rincian per lipatan) |
+| `reports/benchmark.json` | waktu pelatihan, waktu analisis, milidetik per ulasan |
+| `data/processed/rra.sqlite` | hasil tiap jalan beserta komponen skornya (bahan audit) |
+
+## 5. Memakai data Anda sendiri
+
+```bash
+# Seragamkan berkas hasil pengumpulan (CSV/JSONL)
+python scripts/import_reviews.py --input ~/unduhan/maps_export.csv \
+    --text-column reviewText --rating-column stars
+
+# Siapkan berkas kerja anotasi untuk dua pemberi label
+python scripts/make_annotation_template.py --overlap 150 --each 400
+
+# Hitung kesepakatan antar-pemberi label (WAJIB dilaporkan di Bab IV)
+python scripts/compute_kappa.py --first data/reference/anotator_1.csv \
+    --second data/reference/anotator_2.csv --out reports/kappa.json
+
+# Gabungkan menjadi data berlabel
+python scripts/merge_labels.py
+```
+
+Panduan anotasi lengkap: [`docs/ANOTASI.md`](docs/ANOTASI.md).
+
+## 6. Struktur repositori
+
+```
+restaurant-review-analytics/
+├── app/streamlit_app.py          Lapisan 5 — antarmuka pengguna
+├── config/
+│   ├── default.yaml              konfigurasi dasar (semua jalur & parameter)
+│   ├── model_svm.yaml            varian: SVM + TF-IDF
+│   └── model_nb.yaml             varian: Naive Bayes + TF-IDF
+├── data/
+│   ├── raw/                      data mentah
+│   ├── reference/                data berlabel acuan
+│   └── processed/                basis data hasil olahan
+├── docs/                         arsitektur, alur, novelty, anotasi, pengujian
+├── reports/                      laporan keluaran (CSV, Markdown, JSON)
+├── scripts/                      skrip bantu yang dapat dijalankan sendiri
+├── src/rra/
+│   ├── contracts.py              kontrak data antar-lapisan
+│   ├── config.py                 pemuatan & penimpaan konfigurasi
+│   ├── io_layer/                 Lapisan 1 — muat & validasi data
+│   ├── preprocess/               Lapisan 2 — praproses teks Bahasa Indonesia
+│   ├── models/                   Lapisan 3 — komponen model yang dapat diganti
+│   ├── decision/                 Lapisan 4 — ekstraksi frasa, skor prioritas, aturan
+│   ├── evaluate.py               protokol evaluasi (satu sumber angka Bab IV)
+│   ├── pipeline.py               perangkai kelima lapisan
+│   ├── storage/repository.py     penyimpanan hasil & bahan audit
+│   ├── report/report.py          penulis laporan
+│   └── cli.py                    antarmuka baris perintah
+└── tests/                        uji kontrak, integrasi, modularitas, black-box
+```
+
+Penjelasan tiap lapisan dan kontraknya: [`docs/ARSITEKTUR.md`](docs/ARSITEKTUR.md).
+Urutan pemrosesan dari berkas mentah sampai rekomendasi:
+[`docs/ALUR.md`](docs/ALUR.md).
+
+## 7. Pengujian
+
+```bash
+export PYTHONPATH=src
+pytest tests -q
+```
+
+| Berkas uji | Yang dijaga |
+|---|---|
+| `test_contracts.py` | bentuk data antar-lapisan tidak berubah diam-diam |
+| `test_preprocess.py` | praproses Bahasa Indonesia: negasi, batas klausa, singkatan |
+| `test_models.py` | kedua komponen model memenuhi kontrak & memuat metadata tampilan |
+| `test_modularity.py` | **bukti kebaruan**: penggantian model tidak menyentuh modul lain |
+| `test_decision.py` | keparahan, skor prioritas, aturan rekomendasi, frasa keluhan |
+| `test_pipeline.py` | alur menyeluruh & pesan galat yang menuntun |
+| `test_evaluate.py` | kejujuran pelaporan metrik (aspek tanpa dukungan dihitung nol) |
+| `test_cli.py` | antarmuka baris perintah diuji sebagai kotak hitam |
+
+Rincian kriteria kelulusan non-fungsional dan kuesioner SUS:
+[`docs/PENGUJIAN.md`](docs/PENGUJIAN.md).
+
+## 8. Peta berkas skripsi
+
+| Berkas | Sumber di repositori |
+|---|---|
+| Tabel kebutuhan fungsional | `src/rra/cli.py`, `src/rra/decision/module.py` |
+| Tabel kebutuhan non-fungsional | `scripts/benchmark.py`, `docs/PENGUJIAN.md` |
+| Angka kinerja model (Bab IV) | `reports/evaluasi.json` |
+| Nilai Cohen's κ (Bab IV) | `reports/kappa.json` |
+| Gambar arsitektur berlapis | `docs/ARSITEKTUR.md` |
+| Gambar alur sistem | `docs/ALUR.md` |
+
+## 9. Batasan yang diakui
+
+Batasan ini disebutkan apa adanya dan dibahas pada Bab IV:
+
+1. **Polaritas tingkat klausa memakai leksikon**, bukan model kedua. Alasannya
+   dapat diaudit dan tidak mengaburkan asal keputusan, tetapi ia belum
+   mengenali sarkasme.
+2. **Keparahan diturunkan dari rating bintang**, bukan dari teks. Ini
+   disengaja: kesalahan model tidak merambat ke skor prioritas tanpa kendali.
+3. **"Frasa keluhan dominan" bukan "akar masalah definitif"**. Frekuensi
+   menunjukkan sesuatu yang menonjol, bukan hubungan sebab-akibat. Sistem
+   tidak mengklaim mengetahui penyebab.
+4. **Aturan rekomendasi berasal dari pengetahuan domain DINESERV**, bukan
+   dipelajari dari data, sehingga tetap dapat dipertanggungjawabkan.
+5. Data contoh dibangkitkan secara sintetis; angka pada `reports/` hasil data
+   contoh **bukan** temuan penelitian dan tidak boleh dilaporkan sebagai hasil.
+
+## 10. Lisensi
+
+MIT — lihat [`LICENSE`](LICENSE).

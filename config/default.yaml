@@ -1,0 +1,89 @@
+# =====================================================================
+#  Konfigurasi utama sistem
+#  Rancang Bangun Sistem Analitik Ulasan Pelanggan Restoran
+#  ------------------------------------------------------------------
+#  CATATAN PENTING (bukti modularitas):
+#  Kunci `model.name` adalah SATU-SATUNYA hal yang perlu diubah untuk
+#  mengganti komponen pemodelan. Tidak ada berkas kode lain yang
+#  disentuh. Nilai yang tersedia: "svm" | "nb".
+# =====================================================================
+
+project:
+  name: restaurant-review-analytics
+  seed: 42
+
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  reference: data/reference
+  reports: reports
+  figures: docs/figures
+  artifacts: artifacts
+  reviews_file: data/raw/reviews.csv
+  db_path: data/processed/rra.sqlite
+
+# ---------------------------------------------------------------
+# LAPISAN 2 — Praproses teks
+# ---------------------------------------------------------------
+preprocess:
+  lowercase: true
+  remove_urls: true
+  remove_mentions_hashtags: true
+  remove_numbers: true
+  convert_emoji: true
+  normalize_slang: true
+  handle_negation: true
+  negation_window: 3          # jumlah kata ke depan yang terkena cakupan negasi
+  remove_stopwords: true
+  collapse_elongation: true   # "enakkkk" -> "enak"
+  min_token_length: 2
+
+# ---------------------------------------------------------------
+# LAPISAN 3 — Komponen model (DAPAT DIGANTI)
+# ---------------------------------------------------------------
+model:
+  name: svm                   # <<< SATU-SATUNYA BARIS YANG DIGANTI
+  tfidf:
+    max_features: 20000
+    ngram_range: [1, 2]
+    min_df: 2
+    max_df: 0.95
+    sublinear_tf: true
+  aspect_threshold: 0.50      # ambang probabilitas untuk multi-label aspek
+  cv_folds: 10
+  test_size: 0.20
+
+# ---------------------------------------------------------------
+# LAPISAN 4 — Modul keputusan (eksplisit & dapat diaudit)
+# ---------------------------------------------------------------
+decision:
+  top_k_phrases: 5
+  phrase_ngram_max: 3
+  min_phrase_freq: 3
+  severity_from_rating: true  # keparahan diturunkan dari bintang jika tersedia
+  severity_default: 0.5       # dipakai bila rating tidak tersedia
+  # Prioritas(a) = w1*Volume + w2*Keparahan + w3*Keragaman
+  weights:
+    volume: 0.4
+    severity: 0.4
+    diversity: 0.2
+
+# ---------------------------------------------------------------
+# EVALUASI — menjadi bahan Bab IV
+# ---------------------------------------------------------------
+evaluation:
+  folds: 10                  # jumlah lipatan validasi silang
+  top_k: 5                   # K untuk Precision@K frasa keluhan
+  test_size: 0.20            # porsi data uji terpisah (hold-out)
+
+# ---------------------------------------------------------------
+# LAPISAN 1 — Akuisisi data
+# ---------------------------------------------------------------
+acquisition:
+  source: google_maps
+  city: "[KOTA/WILAYAH]"
+  category: "[KATEGORI RESTORAN]"
+  period: "[PERIODE]"
+  target_reviews: 2000
+  request_delay_seconds: 1.5

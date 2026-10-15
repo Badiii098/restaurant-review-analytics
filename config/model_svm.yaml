@@ -1,0 +1,13 @@
+# =====================================================================
+#  VARIAN MODEL — Support Vector Machine (konfigurasi dasar)
+# =====================================================================
+#  Cara pakai:
+#      rra run --config config/default.yaml --override config/model_svm.yaml
+#
+#  Berkas ini sengaja dibuat sangat pendek. Inilah bukti bahwa
+#  penggantian komponen model hanya menuntut perubahan konfigurasi,
+#  bukan perubahan kode.
+# =====================================================================
+
+model:
+  name: svm

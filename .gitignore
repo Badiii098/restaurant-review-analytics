@@ -1,0 +1,44 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---- Virtual environment ----
+.venv/
+venv/
+env/
+
+# ---- Hasil olahan (dapat dibangun ulang) ----
+*.sqlite
+*.sqlite-journal
+models_artifacts/
+reports/*
+!reports/.gitkeep
+!reports/README.md
+
+# ---- Data: yang dihasilkan ulang atau memuat tulisan orang lain ----
+data/raw/*.csv
+data/raw/*.json
+data/raw/*.html
+data/raw/cache/
+data/reference/labels.csv
+data/reference/anotator_*.csv
+data/reference/pertentangan.csv
+data/reference/*.json
+data/processed/*
+!data/processed/.gitkeep
+data/sus_jawaban.csv
+
+# ---- Editor / OS ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

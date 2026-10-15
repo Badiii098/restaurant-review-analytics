@@ -1,0 +1,13 @@
+# =====================================================================
+#  VARIAN MODEL — Multinomial Naive Bayes (komponen pengganti)
+# =====================================================================
+#  Cara pakai:
+#      rra run --config config/default.yaml --override config/model_nb.yaml
+#
+#  Bandingkan berkas ini dengan config/model_svm.yaml. Keduanya HANYA
+#  mengubah satu kunci. Seluruh modul di lapisan lain berjalan tanpa
+#  perubahan apa pun — inilah yang diuji oleh tests/test_modularity.py
+# =====================================================================
+
+model:
+  name: nb
