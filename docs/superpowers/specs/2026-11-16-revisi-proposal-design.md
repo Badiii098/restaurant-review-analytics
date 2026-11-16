@@ -15,7 +15,7 @@ tiga RM pakem, fokus rekayasa perangkat lunak, satu model tanpa swap test, luara
 | Topik | Keputusan |
 |---|---|
 | Wilayah & sampel | Jabodetabek; 18 restoran berulasan terbanyak; 6.874 ulasan; target total 5.000 (≈280/restoran) |
-| Restoran keluar | r06, r11, r14, r16, r18, r24 (`aktif=0` di config/restaurants.csv) |
+| Restoran keluar | r06, r11, r14, r16, r18, r24, serta r20 yang tanpa data (`aktif=0` di config/restaurants.csv) |
 | Sebaran 18 restoran | Jakarta Pusat 12, Jakarta Selatan 3, Jakarta Utara 1, Bekasi 1, Tangerang 1 |
 | Model | TF-IDF + SVM linear saja; Naive Bayes dihapus dari kode, uji, CI, UI; hanya muncul di penelitian terdahulu |
 | Swap test | Dihapus (RM, tujuan, batasan, hipotesis, kasus uji, test_modularity) |

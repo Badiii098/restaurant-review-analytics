@@ -12,21 +12,21 @@ Google Maps untuk penelitian ABSA pada restoran. Skripnya:
 | Butir | Ketetapan |
 |---|---|
 | Populasi | Ulasan publik berbahasa Indonesia pada restoran di Jabodetabek, terbit 2021–2026 |
-| Kerangka sampel | Restoran dengan **≥ 300 ulasan** publik (agar memungkinkan pengambilan 400 ulasan) |
-| Teknik | **Purposive stratified**: 25 restoran, distratifikasi menurut kota (Jakarta 17, Bekasi 2, Depok 2, Tangerang 2, Bogor 2) dan kategori (Padang, Sunda, Jepang, seafood, ayam/bebek, Betawi, bakmi/bakso, martabak, kafe) |
-| Target per restoran | **400 ulasan** |
-| Target total | **25 × 400 = 10.000 ulasan** (ambang minimum metodologi) |
+| Kerangka sampel | Restoran dengan **≥ 300 ulasan** publik (agar memungkinkan pengambilan 280 ulasan) |
+| Teknik | **Purposive**: dari 25 restoran kandidat, dipilih **18 restoran** yang ulasannya paling lengkap (Jakarta Pusat 12, Jakarta Selatan 3, Jakarta Utara 1, Bekasi 1, Tangerang 1). Tujuh restoran dikeluarkan (`aktif=0`): r06, r11, r14, r16, r18, r24 karena ulasan terkumpul < 210, dan r20 karena kosong |
+| Target per restoran | **280 ulasan** |
+| Target total | **18 × 280 = 5.040 ulasan** (ambang minimum 5.000); realisasi **6.874 ulasan** |
 | Urutan pengambilan | Urutkan **Terbaru** (*Newest*) agar periode 2021–2026 tercakup, bukan "Paling relevan" |
-| Bila ulasan dalam rentang < 400 | Ambil seluruh yang tersedia dan catat kekurangan (shortfall) pada `*.meta.json` dan `ringkasan_per_restoran.csv` |
+| Bila ulasan dalam rentang < 280 | Ambil seluruh yang tersedia dan catat kekurangan (shortfall) pada `*.meta.json` dan `ringkasan_per_restoran.csv` |
 | Unit analisis | Satu ulasan (bukan satu restoran); restoran menjadi stratum pelaporan |
 
-**Rasional 400 per restoran.** Dengan n = 400, proporsi sentimen negatif per restoran dapat
-diduga dengan galat baku maksimum ± 4,9% pada tingkat kepercayaan 95% (p = 0,5). Bila satu
-restoran memuat enam aspek, rata-rata tersedia ± 67 ulasan per aspek — cukup untuk
-mengestimasi polaritas per aspek tanpa bergantung pada satu-dua ulasan.
+**Rasional 280 per restoran.** Dengan n = 280, proporsi sentimen negatif per restoran dapat
+diduga dengan margin galat maksimum ± 5,9% pada tingkat kepercayaan 95% (p = 0,5). Dengan
+lima aspek, rata-rata tersedia ± 56 ulasan per aspek — cukup untuk mengestimasi polaritas
+per aspek tanpa bergantung pada satu-dua ulasan.
 
 **Jumlah per aspek untuk klasifikasi.** Pelatihan model memakai gabungan seluruh restoran
-(≈10.000 ulasan), bukan per restoran, sehingga kelas minoritas (negatif) tetap terwakili.
+(≈6.874 ulasan), bukan per restoran, sehingga kelas minoritas (negatif) tetap terwakili.
 Rasio kelas dilaporkan pada `laporan_kualitas.json` dan dipakai untuk menentukan bobot kelas
 pada SVM.
 
@@ -36,7 +36,7 @@ pada SVM.
 1. Ulasan publik (dapat dibaca tanpa login), teks berbahasa Indonesia.
 2. Tanggal ulasan jatuh pada 1 Januari 2021 – 31 Desember 2026.
 3. Panjang teks ≥ 15 karakter dan ≥ 3 kata.
-4. Membahas minimal satu dari enam aspek layanan.
+4. Membahas minimal satu dari lima aspek layanan.
 
 **Eksklusi (ditandai, tidak dihapus)**
 1. Ulasan tanpa teks / hanya rating bintang → `flag_noise=tanpa_teks`.
@@ -86,7 +86,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 # 2) periksa hasil uji: jumlah ulasan, nama tempat yang cocok, presisi tanggal
 .venv/bin/python scripts/scraping/preprocess_reviews.py
 
-# 3) pengambilan penuh (25 restoran × 400 ulasan)
+# 3) pengambilan penuh (18 restoran aktif × 280 ulasan)
 .venv/bin/python scripts/scraping/scrape_maps.py
 
 # 3b) alternatif: menumpang Brave yang sudah login lewat port debug
@@ -97,13 +97,13 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python scripts/scraping/preprocess_reviews.py --tahun-mulai 2021 --tahun-akhir 2026
 ```
 
-Waktu perkiraan: ± 2–5 menit per restoran untuk 400 ulasan (12–20 putaran gulir, jeda acak 0,9–1,6 detik per putaran). Status `perlu_login` pada `*.meta.json` berarti sesi belum login.
+Waktu perkiraan: ± 2–5 menit per restoran untuk 280–400 ulasan (12–20 putaran gulir, jeda acak 0,9–1,6 detik per putaran). Status `perlu_login` pada `*.meta.json` berarti sesi belum login.
 
 ## 5. Kendali mutu yang wajib dilaporkan
 
 | Metrik | Sumber angka | Ambang |
 |---|---|---|
-| Jumlah ulasan terkumpul vs target | `logs/scraping/run_*.json` | ≥ 10.000 total |
+| Jumlah ulasan terkumpul vs target | `logs/scraping/run_*.json` | ≥ 5.000 total |
 | Persentase duplikat | `laporan_kualitas.json` | < 3% |
 | Persentase noise (tanpa teks/terlalu pendek) | `laporan_kualitas.json` | dilaporkan apa adanya |
 | Cakupan tanggal presisi `exact` | `laporan_kualitas.json` | dilaporkan; tren bulanan memakai subset ini |
