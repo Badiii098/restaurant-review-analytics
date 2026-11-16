@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# DIARSIPKAN: SUS berada di luar lingkup penelitian (feedback pembimbing,
+# fokus pada pengujian rekayasa perangkat lunak). Tidak dipakai oleh naskah.
 """Hitung skor SUS (System Usability Scale) dari rekap jawaban.
 
 Masukan: CSV dengan kolom ``responden`` dan ``q1`` … ``q10`` (skala 1–5).
