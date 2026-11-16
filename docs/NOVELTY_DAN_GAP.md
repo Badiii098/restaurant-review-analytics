@@ -1,4 +1,4 @@
-# Urgensi Masalah, Gap Penelitian, dan Kebaruan
+# Urgensi Masalah, Gap Penelitian, dan Kontribusi
 
 Dokumen ini adalah versi ringkas dari argumentasi pada Bab I–II, ditulis
 dengan sumber yang dapat diverifikasi dan dipetakan langsung ke kode.
@@ -66,7 +66,7 @@ rekomendasi perbaikan). Artinya:
 > "menggunakan SVM untuk ABSA ulasan restoran" sudah terbukti dan tidak dapat
 > dipertahankan sebagai kontribusi baru.
 
-Menempatkan kebaruan di sana akan terbantah oleh satu pertanyaan di sidang.
+Menempatkan kontribusi di sana akan terbantah oleh satu pertanyaan di sidang.
 Karena itu kontribusi dipindahkan ke **rekayasa sistem**, yaitu pada apa yang
 belum menjadi perhatian penelitian terdekat: bagaimana sistem seperti itu
 dirancang agar **komponennya dapat diganti, keputusannya dapat diaudit, dan
@@ -79,73 +79,51 @@ mutunya dapat diukur di luar ketepatan model**.
 | Jenis gap | Uraian | Bukti | Kekuatan |
 |---|---|---|---|
 | **Gap artefak** | penelitian terdekat berhenti pada "aspek + sentimen + daftar saran"; belum ada pemisahan tegas antara **komponen klasifikasi** dan **modul keputusan** yang dapat diaudit | bagian metode kedua penelitian terdekat tidak memisahkan keduanya | kuat |
-| **Gap metodologis** | belum ada **uji penggantian komponen model** sebagai bukti modularitas; klaim "sistem modular" umumnya hanya dinyatakan, tidak diuji | kedua penelitian terdekat memakai satu algoritma tetap | kuat |
-| **Gap metodologis** | metrik yang dilaporkan terbatas pada akurasi/F1; **kinerja non-fungsional** (waktu latih, waktu analisis, rasa pengguna) tidak diukur | tidak ada pelaporan waktu proses atau SUS | sedang |
-| **Gap empiris** | peringkat tindakan umumnya berupa daftar berurut tanpa rumus yang dapat ditelusuri; **tidak ada komponen skor yang disimpan** untuk audit | bagian hasil tidak menyertakan penyusun skor | sedang |
-| **Gap domain** | "akar masalah" sering diambil dari ekstraksi kata kunci berbasis **kemenonjolan**, bukan sebab-akibat, tanpa mengakui batas ini | pemakaian RAKE/KeyBERT tanpa pembahasan kausalitas | sedang |
+| **Gap metodologis** | klaim "sistem berlapis" umumnya hanya dinyatakan; **kontrak data antar-lapis** tidak didokumentasikan dan tidak diuji | tidak ada spesifikasi antarmuka pada penelitian terdekat | kuat |
+| **Gap metodologis** | evaluasi terbatas pada akurasi/F1; **pengujian rekayasa** (unit, integrasi, sistem) dan **kinerja non-fungsional** (waktu proses, tanpa jaringan, peramban) tidak dilaporkan | tidak ada pelaporan pengujian perangkat lunak | sedang |
+| **Gap empiris** | peringkat tindakan berupa daftar berurut tanpa rumus yang dapat ditelusuri dan tanpa pembanding pakar | bagian hasil tidak menyertakan penyusun skor | sedang |
+| **Gap domain** | "akar masalah" diambil dari kata kunci yang menonjol, tanpa mengakui bahwa kemenonjolan bukan sebab-akibat | pemakaian ekstraksi kata kunci tanpa pembahasan kausalitas | sedang |
 
 ---
 
-## 4. Kebaruan yang diajukan (dan buktinya)
+## 4. Kontribusi yang diajukan (dan buktinya)
 
-Kebaruan dirumuskan pada tataran **artefak + metodologis** — dua kategori
-terkuat yang dapat dipertahankan tanpa klaim algoritmik:
+Kontribusi dirumuskan pada tataran **artefak + metodologis**, tanpa klaim algoritmik.
 
-### K1. Arsitektur berlapis dengan kontrak antarmuka tetap, dibuktikan lewat uji penggantian komponen
+### K1. Arsitektur lima lapis dengan kontrak data tetap
 
-*Pernyataan.* Sistem disusun lima lapisan dengan kontrak data yang tidak
-berubah; komponen model dipilih lewat konfigurasi, bukan lewat impor di kode
-pemanggil.
+*Pernyataan.* Sistem disusun lima lapis (data, praproses, komponen model,
+modul keputusan, antarmuka); objek yang berpindah lapis didefinisikan pada
+satu berkas kontrak.
 
-*Bukti.* `tests/test_modularity.py` mencatat sidik jari SHA-256 seluruh berkas
-`src/rra/**/*.py` sebelum dan sesudah penggantian model SVM → Naive Bayes;
-sidik jari wajib identik. Berkas konfigurasi kedua model diuji hanya berbeda
-pada satu kunci (`model.name`).
-
-*Mengapa ini kebaruan, bukan hal biasa.* Pada kedua penelitian terdekat
-klaim modularitas hanya dinyatakan pada narasi. Di sini klaim itu menjadi
-**pernyataan yang dapat gagal**, dan karenanya bermakna.
+*Bukti.* `src/rra/contracts.py`, dokumen `docs/KONTRAK.md` yang dibangkitkan
+dari kode, dan `tests/test_contracts.py`.
 
 ### K2. Modul skor prioritas yang eksplisit dan dapat diaudit
 
-*Pernyataan.* Prioritas perbaikan dihitung dengan rumus terbuka
-`Prioritas(a) = w₁·Volume + w₂·Keparahan + w₃·Keragaman`, dan setiap komponen
-skor disimpan per hasil.
+*Pernyataan.* `Prioritas(a) = 0,4·Volume + 0,4·Keparahan + 0,2·Keragaman`,
+ditampilkan pada skala 0–100; setiap komponen disimpan per hasil, diuji
+sensitivitasnya terhadap geseran bobot ±10%, dan dibandingkan dengan urutan
+pakar per restoran.
 
-*Bukti.* `src/rra/decision/priority.py`; tabel `priorities` di
-`data/processed/rra.sqlite` memuat volume, keparahan, keragaman, bobot, dan
-perubahan peringkat.
+*Bukti.* `src/rra/decision/priority.py`, `sensitivity.py`,
+`src/rra/analysis/expert.py`; tabel `priorities` di `rra.sqlite`.
 
-*Mengapa ini kebaruan.* Keluaran "rekomendasi prioritas" pada penelitian
-terdekat adalah daftar berurut. Mengurutkan **deskriptif**; memutuskan butuh
-mekanisme. Dengan rumus terbuka dan komponen tersimpan, setiap peringkat
-dapat ditelusuri sampai angka penyusunnya — dan dapat diaudit oleh pembimbing
-tanpa membuka kode.
+### K3. Pengujian rekayasa perangkat lunak yang terukur
 
-### K3. Pengukuran kinerja non-fungsional dan penerimaan pengguna
+*Pernyataan.* Prototipe diuji pada tingkat unit, integrasi, dan sistem, serta
+pada kebutuhan non-fungsional: waktu proses per 1.000 ulasan, operasi tanpa
+jaringan, latency halaman, kompatibilitas peramban, dan lingkungan.
 
-*Pernyataan.* Selain ketepatan model, sistem diukur pada waktu latih, waktu
-analisis, milidetik per ulasan, serta penerimaan pengguna dengan kuesioner
-SUS.
-
-*Bukti.* `scripts/benchmark.py` → `reports/benchmark.json`; kuesioner dan
-kriteria pada `docs/PENGUJIAN.md`.
-
-*Mengapa ini kebaruan.* Sistem analitik bermanfaat hanya bila cukup cepat
-dipakai berulang. Metrik ini absen dari penelitian terdekat, sehingga
-perbandingannya menjadi kontribusi yang jelas.
+*Bukti.* `tests/`, `scripts/benchmark.py`, `.github/workflows/ci.yml`,
+`docs/PENGUJIAN.md`.
 
 ### K4. Kejujuran klaim sebagai keputusan perancangan
 
 *Pernyataan.* Istilah yang dipakai adalah **"frasa keluhan dominan"**, bukan
-"akar masalah". Sistem tidak mengklaim mengetahui penyebab.
+"akar masalah".
 
-*Bukti.* `decision/phrases.py` (penamaan dan pendokumentasian batasnya),
-`decision/polarity.py` (mengapa leksikon, bukan model kedua).
-
-*Mengapa ini dicatat sebagai kontribusi.* Mengganti klaim yang lebih kuat
-dengan klaim yang benar adalah keputusan perancangan, bukan kelemahan. Ia
-juga menghilangkan satu serangan yang pasti datang di sidang.
+*Bukti.* `decision/phrases.py`, `decision/polarity.py`.
 
 ---
 
@@ -153,29 +131,26 @@ juga menghilangkan satu serangan yang pasti datang di sidang.
 
 | Kriteria | Firdaus dkk. (2024) | Nofandi dkk. (2023) | Sistem ini |
 |---|---|---|---|
-| Domain | restoran Indonesia | restoran Indonesia | restoran Indonesia |
-| Metode ABSA | SVM + TF-IDF | SVM + TF-IDF | SVM + TF-IDF (**dapat diganti**) |
+| Domain | restoran Indonesia | restoran Indonesia | 18 restoran Jabodetabek |
+| Metode ABSA | SVM + TF-IDF | SVM + TF-IDF | SVM + TF-IDF |
 | Aspek | multi-aspek | multi-aspek | 5 aspek DINESERV |
-| Peringkat prioritas | daftar berurut | daftar berurut | **rumus terbuka + komponen tersimpan** |
-| Arsitektur berlapis | dinyatakan | dinyatakan | **diuji (sidik jari SHA-256)** |
-| Uji penggantian model | — | — | **ada (SVM ↔ Naive Bayes)** |
-| Evaluasi non-fungsional | — | — | **waktu latih, waktu analisis, ms/ulasan** |
-| Penerimaan pengguna | — | — | **SUS** |
+| Peringkat prioritas | daftar berurut | daftar berurut | **rumus terbuka, komponen tersimpan, uji sensitivitas, uji pakar** |
+| Arsitektur | dinyatakan | dinyatakan | **lima lapis + kontrak terdokumentasi dan teruji** |
+| Pengujian perangkat lunak | — | — | **unit, integrasi, sistem** |
+| Evaluasi non-fungsional | — | — | **waktu proses, tanpa jaringan, latency, peramban** |
 | Klaim kausalitas | tidak dibahas | tidak dibahas | **batas dinyatakan tegas** |
 
 ---
 
 ## 6. Kalimat yang dipakai saat mempertahankan
 
-> Kebaruan penelitian ini bukan pada algoritmanya. ABSA dengan SVM dan TF-IDF
-> pada ulasan restoran Indonesia sudah terbukti — Firdaus dkk. (2024) dan
-> Nofandi dkk. (2023). Kontribusi penelitian ini ada pada rekayasa sistemnya:
-> arsitektur berlapis dengan kontrak antarmuka tetap, yang dibuktikan dengan
-> mengganti komponen model dari SVM ke Naive Bayes tanpa mengubah satu pun
-> modul lain — dan bukti itu dijalankan otomatis pada setiap perubahan kode.
-> Selain itu, prioritas perbaikan dihitung dengan rumus yang dapat ditelusuri
-> sampai komponen penyusunnya, serta kinerja non-fungsional dan penerimaan
-> pengguna ikut diukur.
+> Kontribusi penelitian ini bukan pada algoritmanya. ABSA dengan SVM dan
+> TF-IDF pada ulasan restoran Indonesia sudah terbukti — Firdaus dkk. (2024)
+> dan Nofandi dkk. (2023). Kontribusinya ada pada rekayasa sistem: arsitektur
+> lima lapis dengan kontrak data yang terdokumentasi dan teruji, skor
+> prioritas yang dapat ditelusuri sampai komponennya dan dibandingkan dengan
+> urutan pakar, serta pengujian perangkat lunak yang terukur sampai ke kinerja
+> non-fungsional.
 
 ---
 
