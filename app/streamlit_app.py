@@ -7,7 +7,7 @@ dan seluruh angka dibaca dari basis data hasil (``rra.sqlite``).
 
 Susunan halaman mengikuti draf desain Google Stitch:
 
-    bilah atas → [peringatan keselarasan model] → kepala laporan →
+    bilah atas → kepala laporan →
     angka ringkas → 01 peringkat → 02 frasa → 03 tindakan → 04 audit
 
 Pipeline hanya dijalankan ketika pengguna menekan tombol hitung ulang;
@@ -33,7 +33,6 @@ import components as ui  # noqa: E402
 import theme  # noqa: E402
 from rra.config import Config  # noqa: E402
 from rra.contracts import ASPECT_LABELS  # noqa: E402
-from rra.models.registry import available_models  # noqa: E402
 from rra.storage.repository import ResultRepository  # noqa: E402
 
 BULAN = {
@@ -43,7 +42,7 @@ BULAN = {
 
 DEFAULT_MODEL = "svm"
 JUDUL = "Prioritas perbaikan layanan"
-NAMA_MODEL = {"svm": "Linear SVC", "nb": "Naive Bayes"}
+NAMA_MODEL = {"svm": "Support Vector Machine (linear)", "nb": "Naive Bayes (arsip)"}
 
 
 def waktu_indonesia(iso_text: str | None) -> str:
@@ -138,7 +137,7 @@ def susun_kalimat_utama(prioritas: list[dict], n_ulasan: int) -> str:
         f"{ui.esc(ui.fmt_int(n_ulasan))} ulasan, lalu menyusun urutan perbaikan. "
         "Peringkat pertama adalah "
         f"<strong>{ui.esc(teratas['label'])}</strong> dengan skor "
-        f"<strong>{ui.esc(ui.fmt_score(teratas['priority']))}</strong>, dipicu "
+        f"<strong>{ui.esc(ui.fmt_priority(teratas['priority']))}</strong>, dipicu "
         f"<strong>{ui.esc(ui.fmt_int(teratas['n_negative']))}</strong> ulasan negatif."
     )
 
@@ -189,12 +188,8 @@ def ukuran_basis_data(cfg: Config) -> tuple[str, str]:
 # --------------------------------------------------------------------------- #
 # Bilah samping
 # --------------------------------------------------------------------------- #
-def bilah_samping(cfg: Config, run: dict | None, nama_db: str, ukuran_db: str) -> str:
-    """Kendali analisis; mengembalikan kunci model yang dipilih pengguna."""
-    pilihan = available_models()
-    kunci = list(pilihan)
-    sekarang = str((run or {}).get("model_name", DEFAULT_MODEL))
-    awal = kunci.index(sekarang) if sekarang in kunci else 0
+def bilah_samping(cfg: Config, run: dict | None, nama_db: str, ukuran_db: str) -> None:
+    """Kendali analisis. Penelitian memakai satu komponen model (SVM linear)."""
     config = (run or {}).get("config") or cfg.as_dict()
 
     with st.sidebar:
@@ -204,12 +199,6 @@ def bilah_samping(cfg: Config, run: dict | None, nama_db: str, ukuran_db: str) -
                 "Komponen model dan panel pemeriksaan laporan operasional.",
             ),
             unsafe_allow_html=True,
-        )
-        dipilih = st.selectbox(
-            "Komponen model",
-            options=kunci,
-            index=awal,
-            format_func=lambda pakai: pilihan[pakai],
         )
         st.caption(keterangan_model(config))
 
@@ -222,7 +211,7 @@ def bilah_samping(cfg: Config, run: dict | None, nama_db: str, ukuran_db: str) -
         if st.button("Hitung ulang analisis", type="primary"):
             with st.spinner("Melatih model dan menyusun prioritas…"):
                 try:
-                    nomor = jalankan_analisis(cfg, dipilih)
+                    nomor = jalankan_analisis(cfg, DEFAULT_MODEL)
                 except Exception as galat:  # noqa: BLE001 - pesan untuk pengguna
                     st.error(f"Analisis gagal dijalankan: {galat}")
                 else:
@@ -245,7 +234,9 @@ def bilah_samping(cfg: Config, run: dict | None, nama_db: str, ukuran_db: str) -
                         {"label": "Basis data", "value": f"{nama_db} ({ukuran_db})", "mono": True},
                         {"label": "Hasil terakhir", "value": f"Nomor {run['run_id']}"},
                         {"label": "Model hasil ini",
-                         "value": str(run["model_name"]).upper(), "accent": True},
+                         "value": NAMA_MODEL.get(str(run["model_name"]),
+                                                 str(run["model_name"]).upper()),
+                         "accent": True},
                         {"label": "Ulasan diproses",
                          "value": f"{ui.fmt_int(run['n_reviews'])} entri"},
                         {"label": "Dibuat", "value": waktu_indonesia(run.get("created_at"))},
@@ -273,7 +264,6 @@ def bilah_samping(cfg: Config, run: dict | None, nama_db: str, ukuran_db: str) -
             ),
             unsafe_allow_html=True,
         )
-    return dipilih
 
 
 # --------------------------------------------------------------------------- #
@@ -293,7 +283,7 @@ def main() -> None:
     run = gudang.load_run(run_id) if run_id is not None else None
     nama_db, ukuran_db = ukuran_basis_data(cfg)
 
-    dipilih = bilah_samping(cfg, run, nama_db, ukuran_db)
+    bilah_samping(cfg, run, nama_db, ukuran_db)
 
     if st.session_state.get("pesan"):
         st.toast(st.session_state.pop("pesan"))
@@ -349,21 +339,6 @@ def main() -> None:
     waktu = run.get("timings") or {}
     teratas = prioritas[0] if prioritas else {}
 
-    if run and dipilih != str(run["model_name"]):
-        label_baru = available_models().get(dipilih, dipilih)
-        st.markdown(
-            ui.alert(
-                "Peringatan keselarasan model komputasi",
-                "Peringkat pada laporan ini dihitung dengan <strong>"
-                f"{ui.esc(str(run['model_name']).upper())}</strong>, sedangkan panel "
-                f"pengaturan menunjuk <strong>{ui.esc(label_baru.upper())}</strong>. "
-                "Angka tetap sah untuk model yang tercatat; tekan Hitung ulang "
-                "analisis bila ingin membandingkan hasil model lain.",
-                f"Konsistensi #{run['run_id']}",
-            ),
-            unsafe_allow_html=True,
-        )
-
     st.markdown(
         ui.report_head(
             JUDUL,
@@ -398,7 +373,7 @@ def main() -> None:
         ui.section(
             1,
             "Peringkat prioritas",
-            "Rentang skor 0,00–1,00 · makin tinggi makin mendesak",
+            "Rentang skor 0–100 · makin tinggi makin mendesak",
             ui.priority_table(prioritas),
             foot=(
                 "Skor bukan nilai kepuasan pelanggan, melainkan tingkat urgensi "

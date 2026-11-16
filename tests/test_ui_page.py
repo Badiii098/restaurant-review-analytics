@@ -60,10 +60,28 @@ def test_halaman_terbentuk_tanpa_galat():
     assert "tersimpan pada" in teks
 
 
-def test_pilihan_model_tersedia_di_bilah_samping():
+def test_bilah_samping_tanpa_pemilih_model():
+    """Penelitian memakai satu model, jadi tidak ada pemilih komponen."""
     _butuh_hasil()
     at = AppTest.from_file(str(APP), default_timeout=120)
     at.run()
     assert not at.exception, at.exception
-    assert len(at.selectbox) == 1
-    assert list(at.selectbox[0].options) == ["Support Vector Machine (linear)"] or len(at.selectbox[0].options) == 1
+    assert len(at.selectbox) == 0
+
+
+def test_hasil_arsip_naive_bayes_tetap_terbaca():
+    """Hasil lama bermodel nb di basis data tetap tampil tanpa galat."""
+    _butuh_hasil()
+    import sqlite3
+
+    with sqlite3.connect(DB) as connection:
+        terakhir = connection.execute(
+            "SELECT model_name FROM runs ORDER BY run_id DESC LIMIT 1"
+        ).fetchone()[0]
+    if terakhir != "nb":
+        pytest.skip("hasil terakhir bukan arsip nb")
+    at = AppTest.from_file(str(APP), default_timeout=120)
+    at.run()
+    assert not at.exception, at.exception
+    teks = "\n".join(blok.value for blok in at.markdown)
+    assert "Naive Bayes (arsip)" in teks

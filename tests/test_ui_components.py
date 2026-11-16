@@ -36,6 +36,13 @@ def test_fmt_score_memakai_koma_desimal():
     assert ui.fmt_score(0.4, 1) == "0,4"
 
 
+def test_fmt_priority_memakai_skala_0_100():
+    assert ui.fmt_priority(0.8151) == "81,5"
+    assert ui.fmt_priority(0) == "0,0"
+    assert ui.fmt_priority(1) == "100,0"
+    assert ui.fmt_priority(None) == "–"
+
+
 def test_fmt_seconds_memilih_satuan_yang_terbaca():
     assert ui.fmt_seconds(1.9022) == "1,90 s"
     assert ui.fmt_seconds(0.0189) == "19 ms"
@@ -143,6 +150,7 @@ def test_priority_table_menandai_tepat_satu_baris_dan_meng_escape_label():
     assert "dari 1.000" in html
     assert "volume 1,00 · keparahan 0,55 · keragaman 1,00" in html
     assert 'style="width:100,0%"' in html
+    assert ">82,2<" in html  # skor ditampilkan pada skala 0–100
 
 
 def test_priority_table_kosong_memberi_pesan():

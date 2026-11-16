@@ -57,6 +57,19 @@ def fmt_score(value: object, digits: int = 2) -> str:
     return text.replace(".", ",")
 
 
+def fmt_priority(value: object) -> str:
+    """Skor prioritas pada skala tampilan 0–100 dengan satu desimal (81,5).
+
+    Basis data menyimpan skor 0–1; skala 0–100 hanya dipakai saat tampil
+    agar sejalan dengan naskah skripsi.
+    """
+    try:
+        number = float(value) * 100  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return "–"
+    return fmt_score(number, 1)
+
+
 def fmt_seconds(value: object) -> str:
     """Durasi ringkas: milidetik untuk nilai kecil, detik untuk sisanya."""
     try:
@@ -243,7 +256,7 @@ def priority_table(rows: Sequence[Mapping[str, Any]]) -> str:
             f'<span class="rra-sub">dari {fmt_int(row.get("n_total", 0))}</span></td>'
             f'<td class="rra-w-score"><span class="rra-bar">'
             f'<i style="width:{bar_width(row["priority"], top)}"></i></span></td>'
-            f'<td class="n rra-w-value rra-score">{fmt_score(row["priority"])}</td>'
+            f'<td class="n rra-w-value rra-score">{fmt_priority(row["priority"])}</td>'
             "</tr>"
         )
     return (
