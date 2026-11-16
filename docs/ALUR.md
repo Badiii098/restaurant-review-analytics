@@ -11,7 +11,7 @@ flowchart LR
     A["Berkas mentah<br/>data/raw/reviews.csv"] --> B["01 · Muat data<br/>validasi bentuk"]
     B --> C["02 · Praproses<br/>10 tahap + klausa"]
     C --> D["03 · Muat label<br/>data/reference/labels.csv"]
-    D --> E["04 · Latih model<br/>TF-IDF + SVM/NB"]
+    D --> E["04 · Latih model<br/>TF-IDF + SVM linear"]
     E --> F["05 · Klasifikasi<br/>aspek + sentimen"]
     F --> G["06 · Modul keputusan<br/>frasa, prioritas, aturan"]
     G --> H["Laporan<br/>CSV · Markdown · SQLite"]
@@ -88,8 +88,8 @@ export PYTHONPATH=src
 # 01-06 sekaligus
 python -m rra.cli run
 
-# Tahap 06 saja dengan model berbeda (bukti kebaruan)
-python -m rra.cli run --override config/model_nb.yaml
+# Uji sensitivitas bobot prioritas ±10%
+python -m rra.cli sensitivity
 
 # Telusuri praproses satu kalimat
 python -m rra.cli explain "makanannya enak bgt tapi pelayanannya lama, parkirnya susah"
@@ -108,7 +108,7 @@ python -m rra.cli models
 | 04 Latih model | Implementasi komponen model | Macro-F1 aspek & sentimen per lipatan |
 | 05 Klasifikasi | Evaluasi kinerja model | Precision@K, matriks kebingungan per aspek |
 | 06 Modul keputusan | Perancangan modul skor prioritas | tabel komponen skor tiap aspek |
-| Laporan | Pengujian & dokumentasi | waktu proses, kebutuhan non-fungsional, SUS |
+| Laporan | Pengujian & dokumentasi | persentase uji lulus, waktu proses, uji tanpa jaringan, latency, peramban |
 
 ## 5. Titik kegagalan yang ditangani
 
@@ -132,9 +132,10 @@ Sistem dirancang memberi pesan yang **menuntun**, bukan galat teknis:
 4. Hitung kesepakatan → `scripts/compute_kappa.py` → `reports/kappa.json`
 5. Gabungkan label → `scripts/merge_labels.py` → `data/reference/labels.csv`
 6. Jalankan sistem → `python -m rra.cli run`
-7. Evaluasi model → `python -m rra.cli evaluate --folds 10 --compare`
+7. Evaluasi model (pendukung) → `python -m rra.cli evaluate --folds 10`
 8. Ukur non-fungsional → `python -m rra.cli benchmark --repeat 5`
-9. Kumpulkan kuesioner SUS → `docs/PENGUJIAN.md`
+9. Uji sensitivitas → `python -m rra.cli sensitivity`
+10. Uji kesesuaian pakar → `python scripts/uji_pakar.py` (urutan pakar per restoran)
 
 Langkah 4 termasuk yang **tidak boleh dilewati**: tanpa κ, mutu data berlabel
 tidak dapat dipertanggungjawabkan, dan seluruh angka kinerja kehilangan
