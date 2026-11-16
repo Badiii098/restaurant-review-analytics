@@ -28,7 +28,7 @@ from rra.pipeline import Pipeline  # noqa: E402
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repeat", type=int, default=5)
-    parser.add_argument("--model", default=None, choices=["svm", "nb"])
+    parser.add_argument("--model", default=None, choices=["svm"])
     parser.add_argument("--out", default="reports/benchmark.json")
     parser.add_argument("--root", default=str(ROOT))
     args = parser.parse_args()

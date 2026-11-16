@@ -66,4 +66,4 @@ def test_pilihan_model_tersedia_di_bilah_samping():
     at.run()
     assert not at.exception, at.exception
     assert len(at.selectbox) == 1
-    assert len(at.selectbox[0].options) >= 2
+    assert list(at.selectbox[0].options) == ["Support Vector Machine (linear)"] or len(at.selectbox[0].options) == 1

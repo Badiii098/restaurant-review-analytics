@@ -64,7 +64,7 @@ def test_sentiment_metrics_handles_empty_input() -> None:
 
 def test_cross_validate_reports_every_fold(small_labels) -> None:
     texts, aspects, sentiments = small_labels
-    report = cross_validate(lambda: get_model_class("nb")(), texts, aspects, sentiments, folds=4)
+    report = cross_validate(lambda: get_model_class("svm")(), texts, aspects, sentiments, folds=4)
     assert report["folds"] == 4
     assert len(report["per_fold"]) == 4
     assert len(report["macro_f1_aspect"]) == 4
@@ -73,9 +73,9 @@ def test_cross_validate_reports_every_fold(small_labels) -> None:
 
 def test_cross_validate_is_reproducible(small_labels) -> None:
     texts, aspects, sentiments = small_labels
-    first = cross_validate(lambda: get_model_class("nb")(), texts, aspects, sentiments,
+    first = cross_validate(lambda: get_model_class("svm")(), texts, aspects, sentiments,
                             folds=4, seed=11)
-    second = cross_validate(lambda: get_model_class("nb")(), texts, aspects, sentiments,
+    second = cross_validate(lambda: get_model_class("svm")(), texts, aspects, sentiments,
                              folds=4, seed=11)
     assert first["macro_f1_aspect"] == second["macro_f1_aspect"]
 

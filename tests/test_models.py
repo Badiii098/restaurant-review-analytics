@@ -21,8 +21,9 @@ def test_registry_is_not_empty() -> None:
     assert MODEL_NAMES, "Registri komponen model tidak boleh kosong."
 
 
-def test_registry_contains_documented_models() -> None:
-    assert {"svm", "nb"} <= set(MODEL_NAMES)
+def test_only_svm_registered() -> None:
+    """Penelitian memakai satu komponen model: SVM linear."""
+    assert set(available_models()) == {"svm"}
 
 
 @pytest.mark.parametrize("name", MODEL_NAMES)
@@ -96,8 +97,6 @@ def test_save_and_load_roundtrip(name: str, small_labels, tmp_path) -> None:
 def test_build_model_follows_configuration(config) -> None:
     config._data["model"]["name"] = "svm"
     assert build_model(config).name == "svm"
-    config._data["model"]["name"] = "nb"
-    assert build_model(config).name == "nb"
 
 
 def test_build_model_rejects_unknown_name(config) -> None:
