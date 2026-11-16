@@ -80,8 +80,8 @@ evaluation:
 # ---------------------------------------------------------------
 acquisition:
   source: google_maps
-  city: "[KOTA/WILAYAH]"
+  city: "Jabodetabek"
   category: "[KATEGORI RESTORAN]"
   period: "[PERIODE]"
-  target_reviews: 2000
+  target_reviews: 5000
   request_delay_seconds: 1.5

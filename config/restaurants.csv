@@ -1,26 +1,26 @@
 kode,nama,query,kota,kategori,target_ulasan,url,aktif
-r01,Sate Khas Senayan Kebon Sirih,"Sate Khas Senayan Kebon Sirih Jakarta",Jakarta Pusat,Restoran keluarga,400,,1
-r02,Bakmi GM Plaza Senayan,"Bakmi GM Plaza Senayan Jakarta",Jakarta Pusat,Mie & bakmi,400,,1
-r03,Solaria Grand Indonesia,"Solaria Grand Indonesia Jakarta",Jakarta Pusat,Restoran keluarga,400,,1
-r04,Restoran Sederhana Padang Fatmawati,"Restoran Sederhana Padang Fatmawati Jakarta",Jakarta Selatan,Masakan Padang,400,,1
-r05,Ayam Goreng Fatmawati Cipete,"Ayam Goreng Fatmawati Cipete Jakarta",Jakarta Selatan,Ayam goreng,400,,1
-r06,D'Cost Seafood Kelapa Gading,"D'Cost Seafood Kelapa Gading Jakarta",Jakarta Utara,Seafood,400,,1
-r07,Sushi Tei Plaza Senayan,"Sushi Tei Plaza Senayan Jakarta",Jakarta Pusat,Masakan Jepang,400,,1
-r08,Marugame Udon Grand Indonesia,"Marugame Udon Grand Indonesia Jakarta",Jakarta Pusat,Masakan Jepang,400,,1
-r09,HokBen Kelapa Gading,"HokBen Kelapa Gading Jakarta",Jakarta Utara,Cepat saji Jepang,400,,1
-r10,Yoshinoya Sudirman,"Yoshinoya Sudirman Jakarta",Jakarta Pusat,Cepat saji Jepang,400,,1
-r11,Warung Nasi Ampera Kebayoran,"Warung Nasi Ampera Kebayoran Jakarta",Jakarta Selatan,Masakan Sunda,400,,1
-r12,Sate Taichan Goreng Senayan,"Sate Taichan Goreng Senayan Jakarta",Jakarta Pusat,Sate & grilled,400,,1
-r13,Bebek Kaleyo Bekasi,"Bebek Kaleyo Bekasi",Bekasi,Masakan Sunda,400,,1
-r14,Ayam Bakar Primarasa Depok,"Ayam Bakar Primarasa Depok",Depok,Ayam bakar,400,,1
-r15,Warung Tekko Tangerang,"Warung Tekko Tangerang",Tangerang,Masakan Sunda,400,,1
-r16,Bakso Boedjangan Bogor,"Bakso Boedjangan Bogor",Bogor,Bakso,400,,1
-r17,Pempek Bung Cikini,"Pempek Bung Cikini Jakarta",Jakarta Pusat,Masakan Palembang,400,,1
-r18,Gudeg Yu Djum Cikini,"Gudeg Yu Djum Cikini Jakarta",Jakarta Pusat,Masakan Jawa,400,,1
-r19,Nasi Uduk Babet Cikini,"Nasi Uduk Babet Cikini Jakarta",Jakarta Pusat,Masakan Betawi,400,,1
-r20,Soto Betawi H. Ma'ruf,"Soto Betawi H. Ma'ruf Jakarta",Jakarta Selatan,Masakan Betawi,400,,1
-r21,Nasi Goreng Kambing Kebon Sirih,"Nasi Goreng Kambing Kebon Sirih Jakarta",Jakarta Pusat,Masakan Betawi,400,,1
-r22,Remboelan Plaza Senayan,"Remboelan Plaza Senayan Jakarta",Jakarta Pusat,Masakan Nusantara,400,,1
-r23,Kampung Kecil Sabang,"Kampung Kecil Sabang Jakarta",Jakarta Pusat,Masakan Nusantara,400,,1
-r24,Talaga Sari,"Talaga Sari Restaurant Jakarta",Jakarta Selatan,Masakan Nusantara,400,,1
-r25,Martabak Bangka Kemang,"Martabak Bangka Kemang Jakarta",Jakarta Selatan,Martabak,400,,1
+r01,Sate Khas Senayan Kebon Sirih,"Sate Khas Senayan Kebon Sirih Jakarta",Jakarta Pusat,Restoran keluarga,280,,1
+r02,Bakmi GM Plaza Senayan,"Bakmi GM Plaza Senayan Jakarta",Jakarta Pusat,Mie & bakmi,280,,1
+r03,Solaria Grand Indonesia,"Solaria Grand Indonesia Jakarta",Jakarta Pusat,Restoran keluarga,280,,1
+r04,Restoran Sederhana Padang Fatmawati,"Restoran Sederhana Padang Fatmawati Jakarta",Jakarta Selatan,Masakan Padang,280,,1
+r05,Ayam Goreng Fatmawati Cipete,"Ayam Goreng Fatmawati Cipete Jakarta",Jakarta Selatan,Ayam goreng,280,,1
+r06,D'Cost Seafood Kelapa Gading,"D'Cost Seafood Kelapa Gading Jakarta",Jakarta Utara,Seafood,400,,0
+r07,Sushi Tei Plaza Senayan,"Sushi Tei Plaza Senayan Jakarta",Jakarta Pusat,Masakan Jepang,280,,1
+r08,Marugame Udon Grand Indonesia,"Marugame Udon Grand Indonesia Jakarta",Jakarta Pusat,Masakan Jepang,280,,1
+r09,HokBen Kelapa Gading,"HokBen Kelapa Gading Jakarta",Jakarta Utara,Cepat saji Jepang,280,,1
+r10,Yoshinoya Sudirman,"Yoshinoya Sudirman Jakarta",Jakarta Pusat,Cepat saji Jepang,280,,1
+r11,Warung Nasi Ampera Kebayoran,"Warung Nasi Ampera Kebayoran Jakarta",Jakarta Selatan,Masakan Sunda,400,,0
+r12,Sate Taichan Goreng Senayan,"Sate Taichan Goreng Senayan Jakarta",Jakarta Pusat,Sate & grilled,280,,1
+r13,Bebek Kaleyo Bekasi,"Bebek Kaleyo Bekasi",Bekasi,Masakan Sunda,280,,1
+r14,Ayam Bakar Primarasa Depok,"Ayam Bakar Primarasa Depok",Depok,Ayam bakar,400,,0
+r15,Warung Tekko Tangerang,"Warung Tekko Tangerang",Tangerang,Masakan Sunda,280,,1
+r16,Bakso Boedjangan Bogor,"Bakso Boedjangan Bogor",Bogor,Bakso,400,,0
+r17,Pempek Bung Cikini,"Pempek Bung Cikini Jakarta",Jakarta Pusat,Masakan Palembang,280,,1
+r18,Gudeg Yu Djum Cikini,"Gudeg Yu Djum Cikini Jakarta",Jakarta Pusat,Masakan Jawa,400,,0
+r19,Nasi Uduk Babet Cikini,"Nasi Uduk Babet Cikini Jakarta",Jakarta Pusat,Masakan Betawi,280,,1
+r20,Soto Betawi H. Ma'ruf,"Soto Betawi H. Ma'ruf Jakarta",Jakarta Selatan,Masakan Betawi,400,,0
+r21,Nasi Goreng Kambing Kebon Sirih,"Nasi Goreng Kambing Kebon Sirih Jakarta",Jakarta Pusat,Masakan Betawi,280,,1
+r22,Remboelan Plaza Senayan,"Remboelan Plaza Senayan Jakarta",Jakarta Pusat,Masakan Nusantara,280,,1
+r23,Kampung Kecil Sabang,"Kampung Kecil Sabang Jakarta",Jakarta Pusat,Masakan Nusantara,280,,1
+r24,Talaga Sari,"Talaga Sari Restaurant Jakarta",Jakarta Selatan,Masakan Nusantara,400,,0
+r25,Martabak Bangka Kemang,"Martabak Bangka Kemang Jakarta",Jakarta Selatan,Martabak,280,,1
