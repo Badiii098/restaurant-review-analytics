@@ -1,8 +1,8 @@
 """Pemuatan konfigurasi sistem.
 
 Konfigurasi disusun berlapis: berkas dasar (``config/default.yaml``) dapat
-ditimpa oleh berkas varian (mis. ``config/model_nb.yaml``) dan oleh
-penimpaan langsung dari baris perintah (``--set model.name=nb``).
+ditimpa oleh berkas varian (mis. ``config/model_svm.yaml``) dan oleh
+penimpaan langsung dari baris perintah (``--set model.aspect_threshold=0.4``).
 
 Pemisahan inilah yang membuat penggantian komponen model hanya menuntut
 perubahan konfigurasi, bukan perubahan kode.

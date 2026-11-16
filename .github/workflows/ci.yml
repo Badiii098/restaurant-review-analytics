@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  uji:
+    name: Uji dan verifikasi alur
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Pasang dependensi
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Jalankan seluruh uji
+        env:
+          PYTHONPATH: src
+        run: pytest tests -q
+
+      - name: Buat data contoh
+        env:
+          PYTHONPATH: src
+        run: python -m rra.cli sample-data --n 400
+
+      - name: Jalankan alur end-to-end (SVM)
+        env:
+          PYTHONPATH: src
+        run: python -m rra.cli run
+
+      - name: Evaluasi komponen model
+        env:
+          PYTHONPATH: src
+        run: python -m rra.cli evaluate --folds 3 --out reports/ci_evaluasi.json
+
+      - name: Simpan laporan sebagai artefak
+        uses: actions/upload-artifact@v4
+        with:
+          name: laporan-py${{ matrix.python-version }}
+          path: |
+            reports/
+            data/processed/
+          if-no-files-found: warn

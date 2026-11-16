@@ -4,8 +4,7 @@
 Contoh::
 
     python scripts/run_pipeline.py
-    python scripts/run_pipeline.py --model nb
-    python scripts/run_pipeline.py --override config/model_nb.yaml
+    python scripts/run_pipeline.py --override config/eksperimen.yaml
 """
 
 from __future__ import annotations
@@ -26,7 +25,7 @@ from rra.storage.repository import ResultRepository  # noqa: E402
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", default=None, choices=["svm", "nb"],
+    parser.add_argument("--model", default=None, choices=["svm"],
                         help="Komponen model yang dipakai.")
     parser.add_argument("--override", default=None, help="Berkas konfigurasi varian.")
     parser.add_argument("--root", default=str(ROOT), help="Direktori akar proyek.")

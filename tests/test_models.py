@@ -21,8 +21,9 @@ def test_registry_is_not_empty() -> None:
     assert MODEL_NAMES, "Registri komponen model tidak boleh kosong."
 
 
-def test_registry_contains_documented_models() -> None:
-    assert {"svm", "nb"} <= set(MODEL_NAMES)
+def test_only_svm_registered() -> None:
+    """Penelitian memakai satu komponen model: SVM linear."""
+    assert set(available_models()) == {"svm"}
 
 
 @pytest.mark.parametrize("name", MODEL_NAMES)
@@ -96,8 +97,6 @@ def test_save_and_load_roundtrip(name: str, small_labels, tmp_path) -> None:
 def test_build_model_follows_configuration(config) -> None:
     config._data["model"]["name"] = "svm"
     assert build_model(config).name == "svm"
-    config._data["model"]["name"] = "nb"
-    assert build_model(config).name == "nb"
 
 
 def test_build_model_rejects_unknown_name(config) -> None:
@@ -157,3 +156,30 @@ def test_both_sentiment_classes_can_be_predicted(name: str) -> None:
     model.fit(texts, aspects, sentiments)
     predicted = {item.sentiment for p in model.predict(texts) for item in p.items}
     assert predicted == {"positif", "negatif"}
+
+
+def test_svm_handles_aspect_present_in_every_example() -> None:
+    """Aspek yang muncul di semua contoh tidak boleh membuat prediksi gagal.
+
+    OneVsRestClassifier mengganti estimator aspek konstan dengan prediktor
+    konstan yang punya ``predict_proba``, sehingga ``hasattr`` salah menyimpulkan
+    bahwa seluruh estimator SVM menyediakannya.
+    """
+    texts = [
+        "makanan enak pelayanan cepat", "makanan hambar pelayanan lambat",
+        "makanan enak harga murah", "makanan dingin harga mahal",
+        "makanan gurih pelayanan ramah", "makanan asin harga mahal",
+    ]
+    aspects = [["makanan", "pelayanan"], ["makanan", "pelayanan"], ["makanan", "harga"],
+               ["makanan", "harga"], ["makanan", "pelayanan"], ["makanan", "harga"]]
+    sentiments = [{"makanan": "positif", "pelayanan": "positif"},
+                  {"makanan": "negatif", "pelayanan": "negatif"},
+                  {"makanan": "positif", "harga": "positif"},
+                  {"makanan": "negatif", "harga": "negatif"},
+                  {"makanan": "positif", "pelayanan": "positif"},
+                  {"makanan": "negatif", "harga": "negatif"}]
+    model = get_model_class("svm")(tfidf={"min_df": 1})
+    model.fit(texts, aspects, sentiments)
+    predictions = model.predict(texts)
+    assert len(predictions) == len(texts)
+    assert all(any(i.aspect == "makanan" for i in p.items) for p in predictions)

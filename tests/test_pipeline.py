@@ -107,7 +107,7 @@ def test_second_run_gets_a_new_id(output, tmp_path) -> None:
     repository = ResultRepository(tmp_path / "dua.sqlite")
     first = repository.save_run(model_name="svm", decision=result.decision,
                                severities=severity_map(reviews), reviews=reviews)
-    second = repository.save_run(model_name="nb", decision=result.decision,
+    second = repository.save_run(model_name="svm", decision=result.decision,
                                 severities=severity_map(reviews), reviews=reviews)
     assert second > first
 

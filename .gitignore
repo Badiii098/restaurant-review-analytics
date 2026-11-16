@@ -42,3 +42,13 @@ data/sus_jawaban.csv
 .idea/
 .DS_Store
 Thumbs.db
+
+# ---- Scraping Google Maps (data mentah & profil Brave) ----
+.brave-profile/
+logs/scraping/
+data/raw/maps/
+data/processed/scraping/
+CLAUDE.local.md
+.claude/settings.local.json
+.superpowers/
+artifacts/

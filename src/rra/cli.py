@@ -8,6 +8,7 @@ Perintah yang tersedia::
     rra benchmark     # ukur kinerja non-fungsional (KNF-01, KNF-02)
     rra models        # tampilkan komponen model yang tersedia
     rra explain       # tunjukkan bahan audit peringkat prioritas
+    rra sensitivity   # uji sensitivitas bobot prioritas ±10%
     rra trace         # telusuri praproses satu teks ulasan
 """
 
@@ -30,8 +31,8 @@ def _common_options() -> argparse.ArgumentParser:
     sehingga pengguna dapat menuliskannya sebelum maupun sesudah nama
     perintah::
 
-        rra --set model.name=nb run
-        rra run --set model.name=nb
+        rra --set model.aspect_threshold=0.4 run
+        rra run --set model.aspect_threshold=0.4
 
     Keduanya sah, karena pengguna tidak seharusnya perlu menghafal urutan.
     """
@@ -48,7 +49,7 @@ def _common_options() -> argparse.ArgumentParser:
     common.add_argument(
         "--override",
         default=argparse.SUPPRESS,
-        help="Berkas konfigurasi varian, mis. config/model_nb.yaml.",
+        help="Berkas konfigurasi varian, mis. config/eksperimen.yaml.",
     )
     common.add_argument(
         "--set",
@@ -56,7 +57,7 @@ def _common_options() -> argparse.ArgumentParser:
         action="append",
         default=argparse.SUPPRESS,
         metavar="KUNCI=NILAI",
-        help="Penimpaan langsung, dapat diulang, mis. --set model.name=nb.",
+        help="Penimpaan langsung, dapat diulang, mis. --set model.aspect_threshold=0.4.",
     )
     common.add_argument(
         "--root",
@@ -91,8 +92,6 @@ def _build_parser() -> argparse.ArgumentParser:
                             help="Evaluasi kinerja komponen model.")
     p_eval.add_argument("--folds", type=int, default=None, help="Jumlah lipatan validasi silang.")
     p_eval.add_argument("--out", default=None, help="Berkas JSON keluaran evaluasi.")
-    p_eval.add_argument("--compare", action="store_true",
-                        help="Bandingkan seluruh komponen model yang tersedia.")
 
     p_bench = sub.add_parser("benchmark", parents=[common],
                              help="Ukur kinerja non-fungsional.")
@@ -104,6 +103,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p_explain = sub.add_parser("explain", parents=[common],
                                help="Tampilkan bahan audit peringkat prioritas.")
     p_explain.add_argument("--db", default=None, help="Berkas basis data hasil (SQLite).")
+
+    p_sens = sub.add_parser("sensitivity", parents=[common],
+                            help="Uji sensitivitas bobot prioritas (±10%%).")
+    p_sens.add_argument("--delta", type=float, default=0.10, help="Besar geseran relatif bobot.")
+    p_sens.add_argument("--out", default=None, help="Berkas JSON keluaran.")
 
     p_trace = sub.add_parser("trace", parents=[common],
                              help="Telusuri praproses satu teks ulasan.")
@@ -253,7 +257,7 @@ def cmd_evaluate(args: argparse.Namespace, cfg: Config) -> int:
     import pandas as pd  # noqa: PLC0415
 
     from rra.evaluate import cross_validate, evaluate_phrase_quality  # noqa: PLC0415
-    from rra.models.registry import available_models, build_model  # noqa: PLC0415
+    from rra.models.registry import build_model  # noqa: PLC0415
     from rra.pipeline import Pipeline  # noqa: PLC0415
 
     folds = args.folds if args.folds is not None else int(cfg.get("evaluation.folds", 10))
@@ -266,7 +270,7 @@ def cmd_evaluate(args: argparse.Namespace, cfg: Config) -> int:
     print(f"Sampel berlabel: {len(texts)} · lipatan: {folds}")
     print()
 
-    names = list(available_models()) if args.compare else [str(cfg.get("model.name", "svm"))]
+    names = [str(cfg.get("model.name", "svm"))]
     results: dict[str, Any] = {}
 
     for name in names:
@@ -372,7 +376,7 @@ def cmd_models(_args: argparse.Namespace, _cfg: Config) -> int:
         if cls.description:
             print(f"           {cls.description}")
     print()
-    print("Ganti komponen: `--set model.name=nb` atau `--override config/model_nb.yaml`")
+    print("Penelitian ini memakai satu komponen model: SVM linear berbasis TF-IDF.")
     return 0
 
 
@@ -438,6 +442,30 @@ def cmd_trace(args: argparse.Namespace, cfg: Config) -> int:
     return 0
 
 
+def cmd_sensitivity(args: argparse.Namespace, cfg: Config) -> int:
+    from rra.decision.sensitivity import weight_sensitivity  # noqa: PLC0415
+    from rra.pipeline import Pipeline  # noqa: PLC0415
+
+    output = Pipeline(cfg).run()
+    assert output.decision is not None
+    rows = weight_sensitivity(output.decision.stats, cfg.get("decision.weights"), args.delta)
+    print(f"Uji sensitivitas bobot ±{args.delta:.0%} ({len(rows)} skenario)")
+    print("-" * 70)
+    for row in rows:
+        status = "peringkat 1 sama" if row["peringkat_1_sama"] else "peringkat 1 berubah"
+        bobot = " / ".join(f"{row['bobot'][k]:.3f}" for k in ("volume", "severity", "diversity"))
+        print(f"  {row['komponen']:<9} {row['arah']}  bobot {bobot}  "
+              f"tau {row['tau_kendall']:+.2f}  {status}  {' > '.join(row['peringkat'])}")
+    if args.out:
+        target = Path(args.out)
+        if not target.is_absolute():
+            target = cfg.root / target
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(rows, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"\nHasil ditulis: {target}")
+    return 0
+
+
 _COMMANDS = {
     "sample-data": cmd_sample_data,
     "run": cmd_run,
@@ -445,6 +473,7 @@ _COMMANDS = {
     "benchmark": cmd_benchmark,
     "models": cmd_models,
     "explain": cmd_explain,
+    "sensitivity": cmd_sensitivity,
     "trace": cmd_trace,
 }
 

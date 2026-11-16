@@ -21,7 +21,6 @@ from rra.models.base import AspectSentimentModel
 #: Modul bawaan yang didaftarkan ketika registri pertama kali dipakai.
 BUILTIN_MODULES: tuple[str, ...] = (
     "rra.models.svm_model",
-    "rra.models.nb_model",
 )
 
 _REGISTRY: dict[str, Type[AspectSentimentModel]] = {}

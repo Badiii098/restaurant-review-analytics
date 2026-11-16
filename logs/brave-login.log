@@ -1,0 +1,8 @@
+[45287:45287:1021/204202.420650:ERROR:content/browser/browser_main_loop.cc:287] GLib-GObject: g_object_set_is_valid_property: object class 'GtkSettings' has no property named 'gtk-modules'
+
+DevTools listening on ws://127.0.0.1:9222/devtools/browser/69ddf139-01e0-435f-bea4-2aedc9c42d79
+[45333:45333:1021/204202.479164:ERROR:media/gpu/vaapi/vaapi_wrapper.cc:1801] vaInitialize failed: unknown libva error
+Warning: maxDynamicUniformBuffersPerPipelineLayout artificially reduced from 500000 to 16 to fit dynamic offset allocation limit.
+Warning: maxDynamicStorageBuffersPerPipelineLayout artificially reduced from 500000 to 16 to fit dynamic offset allocation limit.
+[46350:46350:1021/204502.742771:ERROR:services/on_device_model/ml/gpu_blocklist.cc:120] Unable to get gpu adapter
+[46350:46367:1021/204502.743535:ERROR:services/on_device_model/ml/gpu_blocklist.cc:120] Unable to get gpu adapter

@@ -42,10 +42,11 @@ def test_help_is_available(cli_root: Path) -> None:
         assert command in result.stdout
 
 
-def test_models_lists_both_components(cli_root: Path) -> None:
+def test_models_lists_only_svm(cli_root: Path) -> None:
     result = run_cli(cli_root, "models")
     assert result.returncode == 0
-    assert "svm" in result.stdout and "nb" in result.stdout
+    assert "svm" in result.stdout
+    assert "Naive Bayes" not in result.stdout
 
 
 def test_sample_data_creates_files(cli_root: Path) -> None:
@@ -71,20 +72,13 @@ def test_run_without_data_fails_with_guidance(cli_root: Path) -> None:
     assert "sample-data" in (result.stderr + result.stdout)
 
 
-def test_swapping_model_via_command_line(cli_root: Path) -> None:
-    """Penggantian komponen cukup lewat baris perintah — tanpa ubah kode."""
-    run_cli(cli_root, "sample-data", "--n", "80")
-    svm = run_cli(cli_root, "run", "--no-report")
-    nb = run_cli(cli_root, "run", "--no-report", "--set", "model.name=nb")
-    assert "svm" in svm.stdout
-    assert "nb" in nb.stdout
-
-
-def test_swapping_model_via_config_file(cli_root: Path) -> None:
-    run_cli(cli_root, "sample-data", "--n", "80")
-    result = run_cli(cli_root, "run", "--no-report", "--override", "config/model_nb.yaml")
-    assert result.returncode == 0
-    assert "nb" in result.stdout
+def test_unknown_model_gives_clear_error(cli_root: Path) -> None:
+    """Nama model yang tidak terdaftar ditolak dengan pesan, bukan traceback."""
+    run_cli(cli_root, "sample-data", "--n", "60")
+    result = run_cli(cli_root, "run", "--no-report", "--set", "model.name=nb")
+    assert result.returncode != 0
+    assert "tidak terdaftar" in result.stderr
+    assert "Traceback" not in result.stderr
 
 
 def test_explain_requires_a_previous_run(cli_root: Path) -> None:
@@ -120,3 +114,11 @@ def test_unknown_model_name_is_rejected(cli_root: Path) -> None:
 def test_invalid_set_syntax_is_rejected(cli_root: Path) -> None:
     result = run_cli(cli_root, "models", "--set", "tanpa_sama_dengan")
     assert result.returncode != 0
+
+
+def test_sensitivity_reports_six_scenarios(cli_root: Path) -> None:
+    run_cli(cli_root, "sample-data", "--n", "80")
+    result = run_cli(cli_root, "sensitivity", "--out", "reports/sensitivitas.json")
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.count("peringkat 1 sama") + result.stdout.count("peringkat 1 berubah") == 6
+    assert (cli_root / "reports" / "sensitivitas.json").exists()

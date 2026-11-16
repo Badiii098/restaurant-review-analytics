@@ -1,149 +1,96 @@
 # Rencana Pengujian
 
-Dokumen ini memuat kriteria kelulusan, cara pengumpulan bukti, dan kuesioner
-yang dipakai. Seluruh angka dari dokumen ini menjadi lampiran Bab IV.
+Dokumen ini memuat hipotesis, kriteria kelulusan, kebutuhan non-fungsional,
+dan cara memperoleh bukti. Isinya sama dengan Bab III naskah proposal; angka
+hasilnya menjadi bahan Bab IV.
+
+Fokus pengujian adalah **rekayasa perangkat lunak**: uji unit, integrasi,
+sistem, dan non-fungsional. Penelitian memakai satu komponen model
+(TF-IDF + SVM linear); tidak ada perbandingan antar-algoritma dan tidak ada
+uji penerimaan pengguna.
 
 ---
 
-## 1. Kriteria keberhasilan rekayasa
+## 1. Hipotesis (satu per rumusan masalah)
 
-Tiga kriteria rekayasa (berbeda dari hipotesis statistik) yang menentukan
-apakah sistem dianggap berhasil:
+| RM | H0 | H1 | Uji | Bukti |
+|---|---|---|---|---|
+| 1 — rancangan arsitektur, kebutuhan, kontrak | ada kontrak antar-lapis yang gagal validasi atau kebutuhan tanpa kasus uji | 100% kontrak lolos validasi dan 100% kebutuhan terlacak ke ≥ 1 kasus uji | validasi kontrak (`tests/test_contracts.py`) + matriks keterlacakan Bagian 3 | `docs/KONTRAK.md`, keluaran pytest |
+| 2 — kelulusan uji dan waktu proses | ada uji kritis gagal, atau rata-rata waktu > 60 detik per 1.000 ulasan | seluruh uji kritis lulus dan rata-rata ≤ 60 detik per 1.000 ulasan | pytest; benchmark 5 ulangan; uji-t satu sampel terhadap 60 detik (α = 0,05) | keluaran pytest, `reports/benchmark.json` |
+| 3 — prioritas aspek dan kesesuaian dengan pakar | median ρ Spearman antar-restoran ≤ 0,60 | median ρ > 0,60 | ρ per restoran; Wilcoxon satu sampel satu sisi terhadap 0,60 (α = 0,05); kesesuaian aspek peringkat 1 | `reports/uji_pakar.json` |
 
-| Kode | Kriteria | Ambang | Cara memperoleh bukti |
+Mengapa RM3 diuji pada median antar-restoran, bukan per restoran: dengan lima
+aspek, pada uji dua sisi α = 0,05 hanya ρ = 1,0 yang signifikan (p = 0,017;
+ρ = 0,9 memberi p = 0,083), sehingga kriteria "ρ ≥ 0,60 dan p < 0,05" per
+restoran praktis hanya terpenuhi bila urutan sistem identik dengan pakar.
+
+**Bila H0 tidak ditolak.** RM1: perbaiki kontrak atau tambah kasus uji pada
+iterasi prototipe berikutnya. RM2: telusuri tahap terlambat dari waktu per
+tahap lalu ulangi pengukuran. RM3: laporkan sebagai temuan, tinjau bobot
+lewat uji sensitivitas ±10%, definisi komponen, atau cakupan frasa.
+
+## 2. Kriteria keberhasilan rekayasa
+
+| Kode | Kriteria | Ambang | Bukti |
 |---|---|---|---|
-| KR-1 | **Keterpilahan komponen** — penggantian komponen model tidak mengubah modul lain | sidik jari `src/rra/**/*.py` identik sebelum & sesudah penggantian; berkas konfigurasi berbeda hanya pada `model.name` | `tests/test_modularity.py` |
-| KR-2 | **Keterlacakan keputusan** — setiap peringkat prioritas dapat ditelusuri ke komponen penyusunnya | 100% baris prioritas memuat `volume`, `severity`, `diversity`, bobot, dan peringkat | tabel `priorities` di `data/processed/rra.sqlite` |
-| KR-3 | **Ketahanan masukan** — sistem menerima data tidak sempurna tanpa berhenti | alur selesai pada data uji yang memuat rating kosong, teks duplikat, dan ulasan tanpa aspek | `tests/test_pipeline.py` + pengujian manual |
+| KR-1 | **Kontrak antar-lapis tetap** — setiap objek yang berpindah lapis mengikuti kontrak | 100% kasus `test_contracts.py` lulus | `tests/test_contracts.py`, `docs/KONTRAK.md` |
+| KR-2 | **Keterlacakan keputusan** — setiap peringkat dapat ditelusuri ke komponen penyusunnya | 100% baris prioritas memuat volume, keparahan, keragaman, bobot, peringkat | tabel `priorities` di `data/processed/rra.sqlite` |
+| KR-3 | **Ketahanan masukan** — alur selesai pada data tidak sempurna | alur selesai pada rating kosong, teks duplikat, ulasan tanpa aspek | `tests/test_pipeline.py` |
 
-## 2. Kebutuhan non-fungsional
+## 3. Kebutuhan non-fungsional
 
 | Kode | Kebutuhan | Ambang | Cara mengukur |
 |---|---|---|---|
-| KNF-01 | Waktu analisis untuk 1.000 ulasan | ≤ 60 detik | `python -m rra.cli benchmark --repeat 5` |
-| KNF-02 | Waktu analisis per ulasan | ≤ 60 ms | kolom `klasifikasi_ms_per_ulasan` pada `reports/benchmark.json` |
-| KNF-03 | Keterpakaian (SUS) | ≥ 68 (di atas rata-rata) | kuesioner Bagian 5, minimal 10 responden |
-| KNF-04 | Daya angkat (portabilitas) | berjalan di Linux/Windows/macOS, Python ≥ 3.11 | berkas CI GitHub Actions |
+| KNF-01 | Waktu analisis 1.000 ulasan | rata-rata ≤ 60 detik (5 ulangan) | `python -m rra.cli benchmark --repeat 5` |
+| KNF-02 | Berjalan tanpa jaringan | halaman memuat hasil terakhir dan analisis ulang selesai dengan jaringan dimatikan | skenario manual, basis data lokal SQLite |
+| KNF-03 | Latency muat halaman | ≤ 3 detik sampai peringkat tampil (5 ulangan) | stopwatch peramban / alat pengembang |
+| KNF-04 | Kompatibilitas peramban | halaman tampil benar di Chrome, Firefox, Edge versi terbaru | uji manual + tangkapan layar |
+| KNF-05 | Lingkungan | lulus pytest di Python 3.11 dan 3.12 (CI) serta di perangkat uji yang dicatat spesifikasinya | GitHub Actions + catatan perangkat |
 
-Ambang KNF-01 dan KNF-02 sengaja ditetapkan **sebelum** pengukuran. Menetapkan
-ambang setelah melihat hasil adalah praktik yang tidak dapat
-dipertanggungjawabkan.
+Ambang ditetapkan **sebelum** pengukuran.
 
-## 3. Protokol evaluasi model
-
-| Aspek protokol | Ketetapan |
-|---|---|
-| Pembagian data | **10-fold cross-validation** untuk pelaporan utama; hold-out 80/20 hanya untuk pemeriksaan cepat |
-| Pembagian pada data multilabel | pembagian dilakukan per **ulasan**, bukan per baris aspek — mencegah satu ulasan muncul di data latih sekaligus data uji |
-| Metrik utama | Macro-F1 aspek dan Macro-F1 sentimen (rata-rata per lipatan ± simpangan baku) |
-| Metrik pendukung | micro-F1, precision/recall per aspek, matriks kebingungan |
-| Metrik keluaran keputusan | Precision@K frasa keluhan (K = 5) terhadap daftar acuan |
-| Uji beda | uji-t berpasangan atas 10 nilai lipatan untuk membandingkan dua komponen model |
-| Benih pengacakan | tetap (42), dinyatakan pada naskah |
-
-**Dua angka Macro-F1.** Sistem melaporkan `macro_f1` (menghitung aspek tanpa
-dukungan sebagai nol — **inilah angka resmi**) dan `macro_f1_aktif` (hanya
-aspek yang punya contoh). Angka pertama bersifat ketat dan jujur; angka kedua
-membantu menjelaskan sumber kesalahan. Melaporkan hanya angka kedua akan
-membuat kinerja terlihat lebih tinggi daripada kenyataannya.
-
-## 4. Uji fungsional
+## 4. Uji fungsional (unit, integrasi, sistem)
 
 ```bash
 export PYTHONPATH=src
 pytest tests -q
 ```
 
-| Fungsi | Berkas uji | Diharapkan |
+| Fungsi | Berkas uji | Tingkat |
 |---|---|---|
-| Muat & validasi data | `test_contracts.py` | bentuk data antar-lapisan tidak berubah diam-diam |
-| Praproses Bahasa Indonesia | `test_preprocess.py` | negasi tidak melintasi batas klausa; singkatan dipetakan; klausa utuh |
-| Komponen model | `test_models.py` | kedua model memenuhi kontrak; jumlah skor = jumlah kelas |
-| **Modularitas** | `test_modularity.py` | sidik jari modul identik setelah penggantian model |
-| Modul keputusan | `test_decision.py` | keparahan monoton turun terhadap rating; skor prioritas & aturan benar |
-| Alur menyeluruh | `test_pipeline.py` | alur selesai; pesan galat menuntun saat data kurang |
-| Evaluasi | `test_evaluate.py` | metrik jujur; aspek tanpa dukungan dihitung nol |
-| Antarmuka baris perintah | `test_cli.py` | kotak hitam: `sample-data`, `run`, `models`, `explain` berperilaku benar |
+| Kontrak data antar-lapis | `test_contracts.py` | unit |
+| Praproses Bahasa Indonesia | `test_preprocess.py` | unit |
+| Komponen model SVM | `test_models.py` | unit |
+| Modul keputusan (keparahan, prioritas, frasa, aturan) | `test_decision.py` | unit |
+| Uji sensitivitas bobot ±10% | `test_sensitivity.py` | unit |
+| Kesesuaian dengan pakar | `test_expert.py` | unit |
+| Cakupan sampel 18 restoran | `test_data_scope.py` | unit |
+| Evaluasi model (pendukung) | `test_evaluate.py` | integrasi |
+| Alur menyeluruh | `test_pipeline.py` | integrasi |
+| Antarmuka baris perintah | `test_cli.py` | sistem (kotak hitam, `subprocess`) |
+| Komponen dan halaman antarmuka | `test_ui_components.py`, `test_ui_page.py` | sistem |
 
-Pengujian kotak hitam dijalankan sebagai proses terpisah (`subprocess`), bukan
-memanggil fungsi langsung — inilah wujud **black-box testing** pada pemetaan
-peminatan Software Engineering.
+## 5. Evaluasi model (pendukung, bukan hipotesis)
 
-## 5. Kuesioner SUS (System Usability Scale)
+Macro-F1 aspek dan sentimen dilaporkan dari 10-fold cross-validation (benih
+42), dipisah per ulasan agar satu ulasan tidak muncul di data latih dan uji
+sekaligus. Angka ini hanya menunjukkan bahwa komponen klasifikasi layak
+dipakai; penelitian tidak bertujuan menaikkannya.
 
-Sepuluh pernyataan, dijawab pada skala 1–5 (1 = sangat tidak setuju,
-5 = sangat setuju). Susunannya wajib berselang-seling positif dan negatif.
+## 6. Tabel rekap bukti
 
-| No | Pernyataan | Sifat |
+| Kode | Berkas bukti | Perintah |
 |---|---|---|
-| 1 | Saya ingin sering menggunakan sistem ini | positif |
-| 2 | Sistem ini terasa rumit tanpa alasan yang perlu | negatif |
-| 3 | Sistem ini mudah digunakan | positif |
-| 4 | Saya perlu bantuan teknis untuk dapat menggunakan sistem ini | negatif |
-| 5 | Fitur-fitur pada sistem ini berjalan selaras | positif |
-| 6 | Terlalu banyak ketidaksesuaian pada sistem ini | negatif |
-| 7 | Saya membayangkan orang lain akan cepat terbiasa dengan sistem ini | positif |
-| 8 | Sistem ini terasa membingungkan saat digunakan | negatif |
-| 9 | Saya merasa percaya diri saat menggunakan sistem ini | positif |
-| 10 | Saya perlu mempelajari banyak hal sebelum dapat memakai sistem ini | negatif |
-
-Responden wajib mencoba sistem terlebih dahulu (menganalisis satu berkas
-ulasan, membaca peringkat, dan menelusuri satu rekomendasi sampai komponen
-skornya). Kuesioner tanpa percobaan langsung tidak mengukur apa pun.
-
-## 6. Perhitungan SUS
-
-Untuk pernyataan **positif** (1, 3, 5, 7, 9): `nilai − 1`.
-Untuk pernyataan **negatif** (2, 4, 6, 8, 10): `5 − nilai`.
-
-Jumlahkan kesepuluh nilai (rentang 0–40), lalu kalikan **2,5** → skor 0–100.
-
-```
-SUS = 2,5 × Σ (kontribusi tiap pernyataan)
-```
-
-| Skor SUS | Tafsiran |
-|---|---|
-| ≥ 80,3 | sangat baik (peringkat A) |
-| 68 – 80,2 | baik (peringkat B–C) |
-| 51 – 67,9 | cukup (peringkat D) |
-| < 51 | kurang (peringkat E–F) |
-
-Rumus perhitungan sudah disediakan pada `scripts/hitung_sus.py`; angkanya
-tetap harus dibaca manusia — SUS mengukur persepsi, bukan kebenaran.
-
-## 7. Tabel rekap bukti
-
-| Kode | Berkas bukti | Perintah penghasil |
-|---|---|---|
-| KR-1 | keluaran `pytest tests/test_modularity.py -v` | `pytest tests -q` |
-| KR-2 | ekspor tabel `priorities` | `sqlite3 data/processed/rra.sqlite ".mode csv" "select * from priorities where run_id=1"` |
-| KR-3 | keluaran `pytest tests/test_pipeline.py -v` | `pytest tests -q` |
-| KNF-01, KNF-02 | `reports/benchmark.json` | `python -m rra.cli benchmark --repeat 5` |
-| KNF-03 | rekap kuesioner | `python scripts/hitung_sus.py --input data/sus_jawaban.csv` |
-| KNF-04 | riwayat GitHub Actions | otomatis pada setiap dorongan |
-| Kinerja model | `reports/evaluasi.json` | `python -m rra.cli evaluate --folds 10 --compare` |
+| H RM1, KR-1 | keluaran pytest + `docs/KONTRAK.md` | `pytest tests/test_contracts.py -v`; `python scripts/export_contracts.py` |
+| H RM2, KNF-01 | `reports/benchmark.json` | `python -m rra.cli benchmark --repeat 5` |
+| H RM3 | `reports/uji_pakar.json` | `python scripts/uji_pakar.py --pakar data/reference/urutan_pakar.csv` |
+| Sensitivitas | `reports/sensitivitas.json` | `python -m rra.cli sensitivity --out reports/sensitivitas.json` |
+| KR-2 | ekspor tabel `priorities` | `sqlite3 data/processed/rra.sqlite "select * from priorities"` |
+| KNF-05 | riwayat GitHub Actions | otomatis tiap dorongan |
 | Mutu data berlabel | `reports/kappa.json` | `python scripts/compute_kappa.py …` |
 
-## 8. Uji hipotesis
+## 7. Yang tidak boleh disederhanakan
 
-| Hipotesis | Uji statistik | Kriteria penerimaan |
-|---|---|---|
-| H1 — SVM berbasis TF-IDF mencapai Macro-F1 ≥ 0,80 pada klasifikasi aspek | uji-t satu sampel atas 10 nilai lipatan | p < 0,05 |
-| H2 — ada perbedaan bermakna antara SVM dan Naive Bayes | uji-t **berpasangan** atas 10 nilai lipatan | p < 0,05 |
-| H3 — prioritas sistem berkorelasi dengan penilaian pakar | korelasi peringkat Spearman | ρ ≥ 0,60 dan p < 0,05 |
-| H4 — skor SUS berada di atas rata-rata | uji-t satu sampel terhadap nilai 68 | p < 0,05 |
-
-H2 sengaja diuji berpasangan karena kedua model diuji pada **lipatan yang
-sama**. Menguji keduanya sebagai dua kelompok bebas akan membuang manfaat
-pengendalian variasi antar-lipatan.
-
-## 9. Yang tidak boleh disederhanakan
-
-Tiga hal ini tetap wajib ada, seberapa pun scope dipangkas:
-
-1. **Nilai Cohen's κ** — tanpa ini mutu data berlabel tidak dapat
-   dipertanggungjawabkan.
-2. **Protokol pembagian data latih/uji** — tanpa ini angka kinerja tidak sah.
-3. **Kejujuran klaim** — "frasa keluhan dominan", bukan "akar masalah
-   definitif".
+1. **Cohen's κ** data berlabel — tanpa ini mutu label tidak dapat dipertanggungjawabkan.
+2. **Pemisahan data latih/uji per ulasan.**
+3. **Kejujuran klaim** — "frasa keluhan dominan", bukan "akar masalah"; angka dari data contoh tidak dilaporkan sebagai hasil.

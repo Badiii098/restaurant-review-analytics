@@ -2,10 +2,8 @@
 #  Konfigurasi utama sistem
 #  Rancang Bangun Sistem Analitik Ulasan Pelanggan Restoran
 #  ------------------------------------------------------------------
-#  CATATAN PENTING (bukti modularitas):
-#  Kunci `model.name` adalah SATU-SATUNYA hal yang perlu diubah untuk
-#  mengganti komponen pemodelan. Tidak ada berkas kode lain yang
-#  disentuh. Nilai yang tersedia: "svm" | "nb".
+#  Komponen model: satu-satunya nilai `model.name` adalah "svm"
+#  (TF-IDF + SVM linear). Penelitian tidak membandingkan algoritma.
 # =====================================================================
 
 project:
@@ -82,8 +80,8 @@ evaluation:
 # ---------------------------------------------------------------
 acquisition:
   source: google_maps
-  city: "[KOTA/WILAYAH]"
+  city: "Jabodetabek"
   category: "[KATEGORI RESTORAN]"
   period: "[PERIODE]"
-  target_reviews: 2000
+  target_reviews: 5000
   request_delay_seconds: 1.5

@@ -253,3 +253,28 @@ class ResultRepository:
                 "SELECT * FROM recommendations WHERE run_id = ?", (run_id,)
             ).fetchall()
         return [dict(row) for row in rows]
+
+    def load_run(self, run_id: int | None = None) -> dict[str, Any] | None:
+        """Keterangan satu hasil: waktu, model, jumlah ulasan, bobot, waktu proses.
+
+        Dipakai antarmuka untuk menampilkan asal-usul angka (provenance)
+        tanpa perlu menjalankan ulang pipeline.
+        """
+        run_id = run_id if run_id is not None else self.latest_run_id()
+        if run_id is None or not self._has_table("runs"):
+            return None
+        with closing(self._connect()) as connection, connection:
+            connection.row_factory = sqlite3.Row
+            row = connection.execute(
+                "SELECT * FROM runs WHERE run_id = ?", (run_id,)
+            ).fetchone()
+        if row is None:
+            return None
+        record = dict(row)
+        for key, source in (("weights", "weights_json"), ("timings", "timings_json"),
+                            ("config", "config_json")):
+            try:
+                record[key] = json.loads(record.get(source) or "{}")
+            except (TypeError, ValueError):
+                record[key] = {}
+        return record

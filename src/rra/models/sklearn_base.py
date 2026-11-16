@@ -33,6 +33,23 @@ def _sigmoid(values: np.ndarray) -> np.ndarray:
     return 1.0 / (1.0 + np.exp(-np.clip(values, -30.0, 30.0)))
 
 
+def _try_predict_proba(estimator: Any, matrix: np.ndarray) -> np.ndarray | None:
+    """Panggil ``predict_proba`` bila benar-benar tersedia.
+
+    ``hasattr`` saja tidak cukup: OneVsRestClassifier mengaku memiliki
+    ``predict_proba`` bila estimator pertamanya adalah prediktor konstan
+    (aspek yang muncul di semua contoh latih), padahal estimator SVM lain
+    tidak memilikinya. Karena itu pemanggilan dicoba dan kegagalannya
+    dialihkan ke ``decision_function``.
+    """
+    if not hasattr(estimator, "predict_proba"):
+        return None
+    try:
+        return np.asarray(estimator.predict_proba(matrix), dtype=float)
+    except AttributeError:
+        return None
+
+
 def _scores(estimator: Any, matrix: np.ndarray) -> np.ndarray:
     """Ubah keluaran estimator menjadi nilai keyakinan pada rentang (0, 1).
 
@@ -40,8 +57,8 @@ def _scores(estimator: Any, matrix: np.ndarray) -> np.ndarray:
     melainkan ``decision_function``. Keduanya dijadikan seragam di sini,
     sehingga lapisan di atasnya tidak perlu tahu perbedaannya.
     """
-    if hasattr(estimator, "predict_proba"):
-        raw = np.asarray(estimator.predict_proba(matrix), dtype=float)
+    raw = _try_predict_proba(estimator, matrix)
+    if raw is not None:
         if raw.ndim == 2 and raw.shape[1] == 2:
             return raw[:, 1]
         return raw
@@ -69,8 +86,8 @@ def _class_scores(estimator: Any, matrix: np.ndarray) -> np.ndarray:
     sentimen dari sekitar 0,85 menjadi 0,35. Fungsi ini menutup celah
     tersebut dengan menyusun vektor skor lengkap untuk seluruh kelas.
     """
-    if hasattr(estimator, "predict_proba"):
-        raw = np.asarray(estimator.predict_proba(matrix), dtype=float)
+    raw = _try_predict_proba(estimator, matrix)
+    if raw is not None:
         if raw.ndim == 2:
             return raw
         return raw.reshape(-1, 1)
@@ -91,7 +108,7 @@ def _class_scores(estimator: Any, matrix: np.ndarray) -> np.ndarray:
 class SklearnAspectSentimentModel(AspectSentimentModel):
     """Kerangka umum komponen berbasis scikit-learn."""
 
-    #: Apakah estimator memerlukan fitur bernilai tidak negatif (mis. Naive Bayes).
+    #: Apakah estimator memerlukan fitur bernilai tidak negatif (tidak dipakai SVM; disediakan untuk estimator lain).
     requires_nonnegative: ClassVar[bool] = False
 
     def __init__(

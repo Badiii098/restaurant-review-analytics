@@ -1,0 +1,9 @@
+[47903:47903:1021/204844.270167:ERROR:content/browser/browser_main_loop.cc:287] GLib-GObject: g_object_set_is_valid_property: object class 'GtkSettings' has no property named 'gtk-modules'
+[47952:47952:1021/204844.319154:ERROR:media/gpu/vaapi/vaapi_wrapper.cc:1801] vaInitialize failed: unknown libva error
+
+DevTools listening on ws://127.0.0.1:9222/devtools/browser/5dbce72e-38c7-4164-84ce-14280293ecda
+[47952:47999:1021/205158.449658:ERROR:components/viz/service/display/display.cc:271] Frame latency is negative: -8.247 ms
+Fontconfig error: Cannot load default config file: File not found
+Fontconfig error: Cannot load default config file: File not found
+[47952:47999:1021/210618.820549:ERROR:components/viz/service/display/display.cc:271] Frame latency is negative: -0.968 ms
+[47952:47999:1021/210632.930698:ERROR:components/viz/service/display/display.cc:271] Frame latency is negative: -3.569 ms

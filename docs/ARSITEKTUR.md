@@ -19,9 +19,8 @@ flowchart TD
         B2[preprocess.resources<br/>leksikon & tabel aspek]
     end
 
-    subgraph L3["Lapisan 3 — Komponen Model (dapat diganti)"]
+    subgraph L3["Lapisan 3 — Komponen Model"]
         C1[models.svm_model<br/>TF-IDF + LinearSVC]
-        C2[models.nb_model<br/>TF-IDF + ComplementNB]
         C3[models.registry<br/>pemuat komponen]
     end
 
@@ -104,16 +103,15 @@ Tahap kunci:
 
 | Aspek | Keterangan |
 |---|---|
-| Berkas | `models/base.py`, `models/sklearn_base.py`, `models/svm_model.py`, `models/nb_model.py`, `models/registry.py` |
+| Berkas | `models/base.py`, `models/sklearn_base.py`, `models/svm_model.py`, `models/registry.py` |
 | Masukan | `TrainingExample` |
 | Keluaran | `Prediction` per ulasan (multilabel aspek + sentimen per aspek) |
 | Kontrak | kelas dasar `AspectSentimentModel` menetapkan `fit`, `predict`, `predict_with_ids`, `name`, `display_name`, `description` |
-| Alasan | **inilah letak kebaruan.** Sistem mengklasifikasi dan menyajikan; algoritmanya adalah komponen yang dipilih dari daftar. |
+| Alasan | memisahkan algoritma dari lapis lain lewat kontrak `AspectSentimentModel`, sehingga lapis keputusan dan antarmuka tidak bergantung pada rincian SVM. Penelitian memakai satu komponen: TF-IDF + SVM linear. |
 
 Komponen dialamatkan lewat nama pada konfigurasi (`model.name: svm`), bukan
-lewat impor langsung di kode pemanggil. Berkas `config/model_svm.yaml` dan
-`config/model_nb.yaml` berbeda **hanya pada kunci itu** — dan hal tersebut
-diuji otomatis.
+lewat impor langsung di kode pemanggil. Parameter SVM disimpan di
+`config/model_svm.yaml`.
 
 Penanganan skor: `sklearn_base._class_scores` menyeragamkan keluaran
 `predict_proba` dan `decision_function` menjadi matriks *(jumlah data ×
@@ -130,7 +128,7 @@ akurasi jatuh ke sekitar 0,35. Bug ini menjadi studi kasus pada Bab IV.
 | Masukan | ulasan bersih + `Prediction` |
 | Keluaran | `DecisionOutput`: `priorities`, `phrases`, `recommendations`, `stats`, `weights` |
 | Kontrak | `DecisionModule.run(reviews, predictions, *, clean_text, clauses, model_name)` adalah **satu-satunya** pintu masuk lapisan ini |
-| Alasan | memisahkan **klasifikasi** dari **keputusan**. Penggantian model tidak boleh mengubah cara sistem menetapkan prioritas. |
+| Alasan | memisahkan **klasifikasi** dari **keputusan**. Cara sistem menetapkan prioritas tidak bergantung pada rincian algoritma klasifikasi. |
 
 Empat komponen keputusan:
 
@@ -201,19 +199,19 @@ rekomendasi tindakan harus dapat dipertanggungjawabkan oleh manusia.
 | Berkas | `app/streamlit_app.py`, `report/report.py`, `cli.py` |
 | Peran | **lapisan tipis** — hanya memanggil `Pipeline` dan menampilkan hasilnya |
 | Kontrak | tidak ada logika keputusan di lapisan ini |
-| Alasan | bila ada logika bisnis di sini, uji modularitas kehilangan makna: mengganti model bisa "diam-diam" menuntut perubahan di antarmuka. |
+| Alasan | bila ada logika bisnis di sini, angka di layar dapat menyimpang dari arsip; seluruh angka dibaca dari basis data. |
 
-Pemilih komponen model pada bilah samping antarmuka adalah **perwujudan
-kebaruan di mata pengguna**: mengganti algoritma cukup memilih dari daftar.
+Antarmuka menampilkan skor prioritas pada skala 0–100 (skor tersimpan 0–1
+dikalikan 100 saat tampil) dan tidak menyediakan pemilih model.
 
 ## 3. Mengapa lima lapisan, bukan satu skrip
 
 | Keuntungan | Wujud nyata di repositori |
 |---|---|
-| Model dapat diganti | `model.name: svm` → `nb`; sidik jari modul lain tidak berubah |
+| Kontrak tetap | objek antar-lapis didefinisikan di `contracts.py` dan didokumentasikan di `docs/KONTRAK.md` |
 | Keputusan dapat diaudit | komponen skor prioritas tersimpan per jalan di SQLite |
 | Kesalahan terlokalisasi | bug skor sentimen hanya menyentuh `models/sklearn_base.py` |
-| Dapat diuji per lapisan | delapan berkas uji, termasuk uji kotak hitam untuk CLI |
+| Dapat diuji per lapisan | dua belas berkas uji: unit, integrasi, dan sistem (kotak hitam CLI, halaman) |
 | Dapat dilaporkan tanpa menyebut algoritma | angka Bab IV berasal dari `evaluate.py`, terpisah dari model |
 
 ## 4. Aliran data antar-lapisan
@@ -249,7 +247,7 @@ yang ditulis di dalam kode.
 ```yaml
 project:  { name, seed }
 paths:    { raw, reference, processed, reports, artifacts, reviews_file, labels_file, db_path }
-model:    { name, text: {max_features, ngram_range, min_df}, svm: {...}, nb: {...} }
+model:    { name, text: {max_features, ngram_range, min_df}, svm: {...} }
 aspect_labels: {...}
 decision: { weights: {volume, severity, diversity} }
 evaluation: { folds, top_k, test_size }
@@ -259,7 +257,7 @@ Penimpaan berlapis, dari yang paling umum ke paling khusus:
 
 ```bash
 python -m rra.cli run --config config/default.yaml \
-                      --override config/model_nb.yaml \
+                      --override config/model_svm.yaml \
                       --set decision.weights.volume=0.5
 ```
 
