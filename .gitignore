@@ -50,3 +50,5 @@ data/raw/maps/
 data/processed/scraping/
 CLAUDE.local.md
 .claude/settings.local.json
+.superpowers/
+artifacts/
