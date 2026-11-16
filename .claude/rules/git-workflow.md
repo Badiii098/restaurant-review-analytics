@@ -1,0 +1,3 @@
+- Commit kecil dan atomik, format: tipe(scope): pesan
+- Selalu kerja di branch fitur, bukan main
+- Jalankan test sebelum commit

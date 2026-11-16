@@ -125,6 +125,34 @@ python scripts/merge_labels.py
 
 Panduan anotasi lengkap: [`docs/ANOTASI.md`](docs/ANOTASI.md).
 
+### 5.1 Mengambil data langsung dari Google Maps
+
+Bila data belum ada, gunakan skrip akuisisi berbasis **Brave + Playwright**:
+
+```bash
+# sekali saja: browser Chromium untuk Playwright
+.venv/bin/playwright install chromium
+
+# WAJIB sekali: login manual (Google membatasi 10 ulasan untuk pengunjung anonim)
+.venv/bin/python scripts/scraping/scrape_maps.py --login
+
+# uji: 2 restoran × 60 ulasan
+.venv/bin/python scripts/scraping/scrape_maps.py --pilot
+
+# penuh: 25 restoran × 400 ulasan (daftar di config/restaurants.csv)
+.venv/bin/python scripts/scraping/scrape_maps.py
+
+# alternatif: menumpang Brave yang sudah login (port debug)
+.venv/bin/python scripts/scraping/scrape_maps.py --cdp http://127.0.0.1:9222
+
+# bersihkan + rekap (duplikat, noise, presisi tanggal, sebaran tahun)
+.venv/bin/python scripts/scraping/preprocess_reviews.py
+```
+
+Keluaran: `data/raw/maps/*.jsonl` (mentah) dan `data/processed/scraping/reviews_clean.csv`
+(siap diimpor). Rencana sampel 25 × 400, kriteria inklusi/eksklusi, dan kendali mutu:
+[`docs/AKUISISI_DATA.md`](docs/AKUISISI_DATA.md).
+
 ## 6. Struktur repositori
 
 ```
