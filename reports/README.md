@@ -21,9 +21,9 @@ dapat diperiksa, bukan mengukur kinerja model.
 1. **Jangan melaporkan angka dari data contoh sebagai hasil penelitian.**
    Angka pada Bab IV harus berasal dari ulasan sesungguhnya yang Anda
    kumpulkan dan labeli secara manual.
-2. **Jangan menyimpulkan model "terbaik" dari data contoh.** Perbandingan SVM
-   dan Naive Bayes baru bermakna pada data nyata yang memuat variasi bahasa,
-   salah tulis, dan campur kode.
+2. **Jangan menyimpulkan kinerja model dari data contoh.** Macro-F1 SVM baru
+   bermakna pada data nyata yang memuat variasi bahasa, salah tulis, dan
+   campur kode.
 3. **Jangan menyesuaikan ambang KNF setelah melihat angka ini.** Ambang sudah
    ditetapkan lebih dahulu pada `docs/PENGUJIAN.md`.
 
@@ -39,6 +39,7 @@ dapat diperiksa, bukan mengukur kinerja model.
 | `evaluasi.json` | 10-fold cross-validation, rincian per lipatan (bahan uji hipotesis) |
 | `benchmark.json` | waktu latih, waktu analisis, milidetik per ulasan |
 | `kappa.json` | kesepakatan antar-pemberi label |
-| `sus.json` | rekap skor SUS |
+| `sensitivitas.json` | uji sensitivitas bobot ±10% |
+| `uji_pakar.json` | ρ per restoran, uji Wilcoxon, kesesuaian peringkat 1 |
 
 Untuk memakai data Anda sendiri, ikuti urutan pada `docs/ALUR.md` bagian 6.
