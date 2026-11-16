@@ -1,9 +1,10 @@
 """Kesesuaian peringkat prioritas sistem dengan urutan pakar (RM3).
 
 Per restoran, urutan lima aspek dari sistem dibandingkan dengan urutan dari
-pakar memakai korelasi peringkat Spearman. Dengan hanya lima aspek, nilai p
-per restoran tidak bermakna (ρ = 1,0 pun belum signifikan pada uji dua sisi),
-sehingga keputusan diambil pada tingkat seluruh restoran: median ρ diuji
+pakar memakai korelasi peringkat Spearman. Dengan hanya lima aspek, uji per
+restoran hampir tidak bermakna: pada uji dua sisi α = 0,05 hanya ρ = 1,0 yang
+signifikan (p = 0,017), sedangkan ρ = 0,9 belum (p = 0,083). Karena itu keputusan
+diambil pada tingkat seluruh restoran: median ρ diuji
 terhadap ambang 0,60 dengan uji peringkat bertanda Wilcoxon satu sisi.
 
 H0: median ρ ≤ 0,60. H1: median ρ > 0,60.

@@ -20,8 +20,9 @@ uji penerimaan pengguna.
 | 3 — prioritas aspek dan kesesuaian dengan pakar | median ρ Spearman antar-restoran ≤ 0,60 | median ρ > 0,60 | ρ per restoran; Wilcoxon satu sampel satu sisi terhadap 0,60 (α = 0,05); kesesuaian aspek peringkat 1 | `reports/uji_pakar.json` |
 
 Mengapa RM3 diuji pada median antar-restoran, bukan per restoran: dengan lima
-aspek, ρ = 1,0 pun belum mencapai p < 0,05 pada uji dua sisi, sehingga
-kriteria "ρ ≥ 0,60 dan p < 0,05" per restoran tidak mungkin dipenuhi.
+aspek, pada uji dua sisi α = 0,05 hanya ρ = 1,0 yang signifikan (p = 0,017;
+ρ = 0,9 memberi p = 0,083), sehingga kriteria "ρ ≥ 0,60 dan p < 0,05" per
+restoran praktis hanya terpenuhi bila urutan sistem identik dengan pakar.
 
 **Bila H0 tidak ditolak.** RM1: perbaiki kontrak atau tambah kasus uji pada
 iterasi prototipe berikutnya. RM2: telusuri tahap terlambat dari waktu per
