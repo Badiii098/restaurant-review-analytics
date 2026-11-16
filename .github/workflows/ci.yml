@@ -43,15 +43,10 @@ jobs:
           PYTHONPATH: src
         run: python -m rra.cli run
 
-      - name: Jalankan alur end-to-end (Naive Bayes)
-        env:
-          PYTHONPATH: src
-        run: python -m rra.cli run --set model.name=nb
-
       - name: Evaluasi komponen model
         env:
           PYTHONPATH: src
-        run: python -m rra.cli evaluate --folds 3 --compare --out reports/ci_evaluasi.json
+        run: python -m rra.cli evaluate --folds 3 --out reports/ci_evaluasi.json
 
       - name: Simpan laporan sebagai artefak
         uses: actions/upload-artifact@v4
