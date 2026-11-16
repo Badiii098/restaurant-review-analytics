@@ -157,3 +157,30 @@ def test_both_sentiment_classes_can_be_predicted(name: str) -> None:
     model.fit(texts, aspects, sentiments)
     predicted = {item.sentiment for p in model.predict(texts) for item in p.items}
     assert predicted == {"positif", "negatif"}
+
+
+def test_svm_handles_aspect_present_in_every_example() -> None:
+    """Aspek yang muncul di semua contoh tidak boleh membuat prediksi gagal.
+
+    OneVsRestClassifier mengganti estimator aspek konstan dengan prediktor
+    konstan yang punya ``predict_proba``, sehingga ``hasattr`` salah menyimpulkan
+    bahwa seluruh estimator SVM menyediakannya.
+    """
+    texts = [
+        "makanan enak pelayanan cepat", "makanan hambar pelayanan lambat",
+        "makanan enak harga murah", "makanan dingin harga mahal",
+        "makanan gurih pelayanan ramah", "makanan asin harga mahal",
+    ]
+    aspects = [["makanan", "pelayanan"], ["makanan", "pelayanan"], ["makanan", "harga"],
+               ["makanan", "harga"], ["makanan", "pelayanan"], ["makanan", "harga"]]
+    sentiments = [{"makanan": "positif", "pelayanan": "positif"},
+                  {"makanan": "negatif", "pelayanan": "negatif"},
+                  {"makanan": "positif", "harga": "positif"},
+                  {"makanan": "negatif", "harga": "negatif"},
+                  {"makanan": "positif", "pelayanan": "positif"},
+                  {"makanan": "negatif", "harga": "negatif"}]
+    model = get_model_class("svm")(tfidf={"min_df": 1})
+    model.fit(texts, aspects, sentiments)
+    predictions = model.predict(texts)
+    assert len(predictions) == len(texts)
+    assert all(any(i.aspect == "makanan" for i in p.items) for p in predictions)
