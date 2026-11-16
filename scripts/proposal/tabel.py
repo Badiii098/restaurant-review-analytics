@@ -17,7 +17,7 @@ def _sampel() -> dict:
                   angka(sum(p["kurang"] for p in f["per_restoran"]))])
     return {"judul": "Rencana sampel dan realisasi ulasan per restoran",
             "kolom": ["Kode", "Restoran", "Kota", "Kategori", "Target", "Terkumpul", "Kurang"],
-            "baris": baris, "lebar": [0.7, 3.4, 1.8, 2.2, 1.0, 1.2, 0.9], "footer": True,
+            "baris": baris, "lebar": [1.0, 3.3, 1.8, 2.1, 1.1, 1.4, 1.1], "footer": True,
             "sumber": "Hasil pengambilan data Google Maps, Oktober 2026 (config/restaurants.csv, data/raw/maps)"}
 
 
@@ -26,7 +26,7 @@ def tabel() -> dict[str, dict]:
     return {
     "1.1": {"judul": "Rumusan masalah, tujuan khusus, dan luaran konkret",
         "kolom": ["No", "Rumusan masalah", "Tujuan khusus", "Luaran konkret (dijawab di Bab IV)"],
-        "lebar": [0.5, 4.2, 3.4, 4.0],
+        "lebar": [0.7, 4.2, 3.3, 3.9],
         "baris": [
             ["1", "Bagaimana rancangan arsitektur lima lapis prototipe analisis sentimen berbasis aspek untuk ulasan restoran berbahasa Indonesia beserta katalog kebutuhan dan kontrak antarmuka JSON antar-lapis?",
              "Menghasilkan rancangan arsitektur, katalog kebutuhan fungsional dan non-fungsional, serta kontrak antarmuka antar-lapis",
@@ -40,7 +40,7 @@ def tabel() -> dict[str, dict]:
         ], "sumber": "Rancangan penelitian (2026)"},
     "1.2": {"judul": "Luaran penelitian terperinci",
         "kolom": ["Kode", "Luaran", "Spesifikasi", "RM"],
-        "lebar": [0.7, 2.6, 7.4, 0.8],
+        "lebar": [1.1, 2.6, 7.0, 0.8],
         "baris": [
             ["L1", "Diagram arsitektur", "Lima lapis (data, praproses, komponen model, modul keputusan, antarmuka) beserta aliran data dan batas kontrak antar-lapis", "1"],
             ["L2", "Katalog kebutuhan", "Kebutuhan fungsional (FR) dan non-fungsional (KNF) bernomor, masing-masing dengan kriteria lulus dan kode kasus uji, serta matriks keterlacakan", "1"],
@@ -82,12 +82,12 @@ def tabel() -> dict[str, dict]:
             ["Singgalen (2023)", "Sepuluh restoran Makassar, Tripadvisor", "CRISP-DM dan SERVQUAL", "Sentimen terhadap makanan, layanan, nilai", "Kerangka penambangan data, bukan rekayasa perangkat lunak"],
             ["Carrasco dan Dias (2024)", "1.581 restoran Algarve, 880.000 ulasan", "ABSA berbasis model transformer, aplikasi web", "Metode menyamai klasifikasi manusia", "Tidak ada skor prioritas yang dapat diaudit"],
             ["Li et al. (2023)", "Restoran di dua destinasi wisata AS", "ABSA lima kategori, conditional survival forest", "Sentimen aspek memperbaiki prediksi keberlangsungan restoran", "Menegaskan nilai sentimen per aspek, bukan sistem keputusan"],
-            ["Hua et al. (2024)", "727 studi primer dari 8.550 hasil penelusuran", "Tinjauan pustaka sistematis ABSA", "Kurangnya keragaman dataset dan domain; 78,20% dataset dominan dari SemEval restoran", "Menunjukkan perlunya data lokal dan sistem di luar tolok ukur"],
+            ["Hua et al. (2024)", "727 studi primer dari 8.550 hasil penelusuran", "Tinjauan pustaka sistematis ABSA", "Kurangnya keragaman dataset dan domain; 78,20% pemakaian dataset pada empat dataset SemEval restoran dan laptop", "Menunjukkan perlunya data lokal dan sistem di luar tolok ukur"],
         ], "sumber": "Diolah dari publikasi masing-masing (folder REFERENSI)"},
     "3.1": _sampel(),
     "3.2": {"judul": "Katalog kebutuhan fungsional dan non-fungsional",
         "kolom": ["Kode", "Kebutuhan", "Kriteria lulus", "Kasus uji"],
-        "lebar": [0.9, 4.6, 4.6, 1.6],
+        "lebar": [1.4, 4.4, 4.4, 1.6],
         "baris": [
             ["FR-01", "Memuat dan memvalidasi berkas ulasan (review_id, teks, rating, tanggal, restoran)", "Berkas tidak sah ditolak dengan pesan yang menuntun", "U-01, S-01"],
             ["FR-02", "Membersihkan teks berbahasa Indonesia dan memecah klausa", "Negasi tidak melintasi batas klausa; singkatan dipetakan", "U-02"],
@@ -105,7 +105,7 @@ def tabel() -> dict[str, dict]:
         ], "sumber": "Rancangan penelitian (2026), docs/PENGUJIAN.md"},
     "3.3": {"judul": "Hipotesis, prosedur uji, dan kriteria keputusan",
         "kolom": ["RM", "H0", "H1", "Prosedur dan kriteria", "Bila H0 tidak ditolak"],
-        "lebar": [0.6, 2.6, 2.6, 3.8, 2.6],
+        "lebar": [0.8, 2.6, 2.6, 3.6, 2.6],
         "baris": [
             ["1", "Ada kontrak antar-lapis yang gagal validasi atau kebutuhan yang tidak terlacak ke kasus uji", "100% kontrak lolos validasi dan 100% kebutuhan terlacak ke minimal satu kasus uji", "Validasi kontrak pada keluaran tiap lapis dan matriks keterlacakan Tabel 3.2; H1 diterima bila kedua proporsi 100%", "Perbaiki kontrak atau tambah kasus uji pada iterasi prototipe berikutnya"],
             ["2", "Ada uji kritis yang gagal, atau rata-rata waktu proses > 60 detik per 1.000 ulasan", "Seluruh uji kritis lulus dan rata-rata waktu ≤ 60 detik per 1.000 ulasan", "pytest; benchmark lima ulangan; uji-t satu sampel satu sisi terhadap 60 detik, α = 0,05", "Telusuri tahap terlambat dari waktu per tahap, perbaiki, ukur ulang"],
@@ -113,7 +113,7 @@ def tabel() -> dict[str, dict]:
         ], "sumber": "Rancangan penelitian (2026)"},
     "3.4": {"judul": "Kasus uji dan berkas pengujian",
         "kolom": ["Kode", "Tingkat", "Yang diuji", "Berkas uji", "Kebutuhan"],
-        "lebar": [0.8, 1.4, 4.4, 3.0, 1.4],
+        "lebar": [1.1, 1.4, 4.2, 3.0, 1.4],
         "baris": [
             ["U-01", "Unit", "Kontrak data antar-lapis tidak berubah diam-diam", "test_contracts.py", "FR-01"],
             ["U-02", "Unit", "Praproses: negasi, batas klausa, singkatan", "test_preprocess.py", "FR-02"],
@@ -132,7 +132,7 @@ def tabel() -> dict[str, dict]:
         ], "sumber": "Repositori restaurant-review-analytics, folder tests (2026)"},
     "3.5": {"judul": "Skenario pengujian non-fungsional",
         "kolom": ["Kode", "Kondisi", "Langkah", "Kriteria lulus", "Bukti"],
-        "lebar": [0.8, 2.6, 3.6, 2.4, 2.4],
+        "lebar": [1.1, 2.5, 3.5, 2.4, 2.3],
         "baris": [
             ["N-01", "1.000 ulasan, perangkat uji Tabel 3.6", "Jalankan benchmark lima kali, cache dibersihkan antar-ulangan", "Rata-rata ≤ 60 detik", "reports/benchmark.json"],
             ["N-02", "Jaringan dimatikan", "Buka halaman, tekan hitung ulang analisis", "Peringkat tampil dan hasil baru tersimpan", "Tangkapan layar, baris runs baru"],
