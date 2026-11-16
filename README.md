@@ -31,21 +31,22 @@ ulasan mentah
   → rekomendasi tindakan                 (tabel aturan DINESERV, bukan keluaran model)
 ```
 
-## 2. Kebaruan yang dibuktikan di repositori ini
+## 2. Kontribusi yang dibuktikan di repositori ini
 
-Kebaruan penelitian ini **bukan pada algoritmanya** — ABSA dengan SVM/TF-IDF
+Kontribusi penelitian ini **bukan pada algoritmanya** — ABSA dengan SVM/TF-IDF
 pada ulasan restoran Indonesia sudah terbukti (Firdaus dkk., 2024; Nofandi
-dkk., 2023). Kebaruannya ada pada **rekayasa sistem**, dan tiap klaim di bawah
-punya bukti yang dapat dijalankan:
+dkk., 2023). Kontribusinya ada pada **rekayasa sistem**, dan tiap klaim di bawah
+punya bukti yang dapat dijalankan. Penelitian memakai satu komponen model
+(TF-IDF + SVM linear) dan data 18 restoran di Jabodetabek.
 
-| Klaim kebaruan | Bukti di repositori |
+| Klaim | Bukti di repositori |
 |---|---|
-| Arsitektur berlapis dengan **kontrak antarmuka tetap** | `src/rra/contracts.py`, `src/rra/models/base.py`, `src/rra/decision/module.py` |
-| **Uji penggantian komponen**: model SVM → Naive Bayes tanpa mengubah satu pun modul lain | `tests/test_modularity.py::test_swapping_model_does_not_touch_other_modules` (sidik jari SHA-256 seluruh berkas `src/rra/**`) |
-| Perbedaan konfigurasi model **hanya satu kunci** | `tests/test_modularity.py::test_config_files_differ_by_one_key_only` (`model.name`) |
-| Modul **skor prioritas eksplisit dan dapat diaudit** | `src/rra/decision/priority.py`, penyimpanan komponen skor di `src/rra/storage/repository.py` |
+| Arsitektur lima lapis dengan **kontrak data tetap** | `src/rra/contracts.py`, `docs/KONTRAK.md`, `tests/test_contracts.py` |
+| Modul **skor prioritas eksplisit dan dapat diaudit** (skala tampil 0–100) | `src/rra/decision/priority.py`, komponen skor di `src/rra/storage/repository.py` |
+| **Uji sensitivitas bobot ±10%** | `src/rra/decision/sensitivity.py`, `python -m rra.cli sensitivity` |
+| **Kesesuaian dengan urutan pakar** (ρ per restoran + Wilcoxon) | `src/rra/analysis/expert.py`, `scripts/uji_pakar.py` |
+| **Pengujian rekayasa** unit, integrasi, sistem | `tests/`, `.github/workflows/ci.yml` |
 | Kinerja **non-fungsional terukur** | `scripts/benchmark.py` → `reports/benchmark.json` |
-| Kesiapan **SUS** untuk evaluasi penerimaan pengguna | berkas kuesioner pada `docs/PENGUJIAN.md` |
 
 Rincian argumentasi, gap penelitian, dan perbandingan dengan penelitian
 terdekat: [`docs/NOVELTY_DAN_GAP.md`](docs/NOVELTY_DAN_GAP.md).
@@ -80,14 +81,15 @@ python -m rra.cli sample-data --n 2000 --seed 42
 # 2. Alur end-to-end → CSV, Markdown, dan basis data SQLite
 python -m rra.cli run
 
-# 3. Bandingkan komponen model (validasi silang)
-python -m rra.cli evaluate --folds 10 --compare --out reports/evaluasi.json
+# 3. Evaluasi komponen model (validasi silang, pendukung)
+python -m rra.cli evaluate --folds 10 --out reports/evaluasi.json
 
 # 4. Ukur kinerja non-fungsional
 python -m rra.cli benchmark --repeat 5
 
-# 5. Tampilkan komponen yang terdaftar
-python -m rra.cli models
+# 5. Uji sensitivitas bobot dan kesesuaian dengan pakar
+python -m rra.cli sensitivity --out reports/sensitivitas.json
+python scripts/uji_pakar.py --pakar data/reference/urutan_pakar.csv
 ```
 
 Antarmuka pengguna:
@@ -160,8 +162,8 @@ restaurant-review-analytics/
 ├── app/streamlit_app.py          Lapisan 5 — antarmuka pengguna
 ├── config/
 │   ├── default.yaml              konfigurasi dasar (semua jalur & parameter)
-│   ├── model_svm.yaml            varian: SVM + TF-IDF
-│   └── model_nb.yaml             varian: Naive Bayes + TF-IDF
+│   ├── model_svm.yaml            parameter SVM + TF-IDF
+│   └── restaurants.csv           18 restoran aktif (Jabodetabek), target 280 ulasan
 ├── data/
 │   ├── raw/                      data mentah
 │   ├── reference/                data berlabel acuan
@@ -174,14 +176,15 @@ restaurant-review-analytics/
 │   ├── config.py                 pemuatan & penimpaan konfigurasi
 │   ├── io_layer/                 Lapisan 1 — muat & validasi data
 │   ├── preprocess/               Lapisan 2 — praproses teks Bahasa Indonesia
-│   ├── models/                   Lapisan 3 — komponen model yang dapat diganti
-│   ├── decision/                 Lapisan 4 — ekstraksi frasa, skor prioritas, aturan
+│   ├── models/                   Lapisan 3 — komponen model (SVM linear)
+│   ├── decision/                 Lapisan 4 — frasa, skor prioritas, aturan, sensitivitas
+│   ├── analysis/                 uji kesesuaian peringkat dengan pakar (RM3)
 │   ├── evaluate.py               protokol evaluasi (satu sumber angka Bab IV)
 │   ├── pipeline.py               perangkai kelima lapisan
 │   ├── storage/repository.py     penyimpanan hasil & bahan audit
 │   ├── report/report.py          penulis laporan
 │   └── cli.py                    antarmuka baris perintah
-└── tests/                        uji kontrak, integrasi, modularitas, black-box
+└── tests/                        uji unit, integrasi, sistem (kotak hitam)
 ```
 
 Penjelasan tiap lapisan dan kontraknya: [`docs/ARSITEKTUR.md`](docs/ARSITEKTUR.md).
@@ -199,14 +202,17 @@ pytest tests -q
 |---|---|
 | `test_contracts.py` | bentuk data antar-lapisan tidak berubah diam-diam |
 | `test_preprocess.py` | praproses Bahasa Indonesia: negasi, batas klausa, singkatan |
-| `test_models.py` | kedua komponen model memenuhi kontrak & memuat metadata tampilan |
-| `test_modularity.py` | **bukti kebaruan**: penggantian model tidak menyentuh modul lain |
+| `test_models.py` | komponen SVM memenuhi kontrak & memuat metadata tampilan |
+| `test_sensitivity.py` | peringkat stabil terhadap geseran bobot ±10% |
+| `test_expert.py` | ρ Spearman per restoran, uji Wilcoxon, kesesuaian peringkat 1 |
+| `test_data_scope.py` | cakupan 18 restoran, target 5.040 ulasan, laporan kekurangan |
 | `test_decision.py` | keparahan, skor prioritas, aturan rekomendasi, frasa keluhan |
 | `test_pipeline.py` | alur menyeluruh & pesan galat yang menuntun |
 | `test_evaluate.py` | kejujuran pelaporan metrik (aspek tanpa dukungan dihitung nol) |
 | `test_cli.py` | antarmuka baris perintah diuji sebagai kotak hitam |
+| `test_ui_components.py`, `test_ui_page.py` | komponen dan halaman antarmuka |
 
-Rincian kriteria kelulusan non-fungsional dan kuesioner SUS:
+Hipotesis, kriteria kelulusan, dan kebutuhan non-fungsional:
 [`docs/PENGUJIAN.md`](docs/PENGUJIAN.md).
 
 ## 8. Peta berkas skripsi
