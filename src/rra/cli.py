@@ -8,6 +8,7 @@ Perintah yang tersedia::
     rra benchmark     # ukur kinerja non-fungsional (KNF-01, KNF-02)
     rra models        # tampilkan komponen model yang tersedia
     rra explain       # tunjukkan bahan audit peringkat prioritas
+    rra sensitivity   # uji sensitivitas bobot prioritas ±10%
     rra trace         # telusuri praproses satu teks ulasan
 """
 
@@ -102,6 +103,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p_explain = sub.add_parser("explain", parents=[common],
                                help="Tampilkan bahan audit peringkat prioritas.")
     p_explain.add_argument("--db", default=None, help="Berkas basis data hasil (SQLite).")
+
+    p_sens = sub.add_parser("sensitivity", parents=[common],
+                            help="Uji sensitivitas bobot prioritas (±10%%).")
+    p_sens.add_argument("--delta", type=float, default=0.10, help="Besar geseran relatif bobot.")
+    p_sens.add_argument("--out", default=None, help="Berkas JSON keluaran.")
 
     p_trace = sub.add_parser("trace", parents=[common],
                              help="Telusuri praproses satu teks ulasan.")
@@ -436,6 +442,30 @@ def cmd_trace(args: argparse.Namespace, cfg: Config) -> int:
     return 0
 
 
+def cmd_sensitivity(args: argparse.Namespace, cfg: Config) -> int:
+    from rra.decision.sensitivity import weight_sensitivity  # noqa: PLC0415
+    from rra.pipeline import Pipeline  # noqa: PLC0415
+
+    output = Pipeline(cfg).run()
+    assert output.decision is not None
+    rows = weight_sensitivity(output.decision.stats, cfg.get("decision.weights"), args.delta)
+    print(f"Uji sensitivitas bobot ±{args.delta:.0%} ({len(rows)} skenario)")
+    print("-" * 70)
+    for row in rows:
+        status = "peringkat 1 sama" if row["peringkat_1_sama"] else "peringkat 1 berubah"
+        bobot = " / ".join(f"{row['bobot'][k]:.3f}" for k in ("volume", "severity", "diversity"))
+        print(f"  {row['komponen']:<9} {row['arah']}  bobot {bobot}  "
+              f"tau {row['tau_kendall']:+.2f}  {status}  {' > '.join(row['peringkat'])}")
+    if args.out:
+        target = Path(args.out)
+        if not target.is_absolute():
+            target = cfg.root / target
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(rows, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"\nHasil ditulis: {target}")
+    return 0
+
+
 _COMMANDS = {
     "sample-data": cmd_sample_data,
     "run": cmd_run,
@@ -443,6 +473,7 @@ _COMMANDS = {
     "benchmark": cmd_benchmark,
     "models": cmd_models,
     "explain": cmd_explain,
+    "sensitivity": cmd_sensitivity,
     "trace": cmd_trace,
 }
 

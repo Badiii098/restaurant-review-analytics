@@ -114,3 +114,11 @@ def test_unknown_model_name_is_rejected(cli_root: Path) -> None:
 def test_invalid_set_syntax_is_rejected(cli_root: Path) -> None:
     result = run_cli(cli_root, "models", "--set", "tanpa_sama_dengan")
     assert result.returncode != 0
+
+
+def test_sensitivity_reports_six_scenarios(cli_root: Path) -> None:
+    run_cli(cli_root, "sample-data", "--n", "80")
+    result = run_cli(cli_root, "sensitivity", "--out", "reports/sensitivitas.json")
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.count("peringkat 1 sama") + result.stdout.count("peringkat 1 berubah") == 6
+    assert (cli_root / "reports" / "sensitivitas.json").exists()
