@@ -146,15 +146,31 @@ Endpoint tidak memalsukan angka.
 4. **Anotasi 500 ulasan:** kedua anotator melabeli seluruh 500 ulasan yang sama, dan kappa dihitung
    atas 500 ulasan itu. Ini bacaan paling langsung dari "500 ulasan, kappa" pada diagram. Bawaan
    `make_annotation_template.py` menjadi `--overlap 500 --each 500`.
-5. **8 restoran:** `config/default.yaml` mendapat `sampling: {n_restoran: 8, teknik: purposive,
-   kriteria: [...]}`. `restaurants.csv` tidak diubah sekarang, dan dashboard menandai bila jumlah
-   restoran aktif ≠ 8.
-6. **Nama restoran di naskah:** Bab III memuat teknik *purposive sampling*, kriteria
-   inklusi/eksklusi, n = 8, dan target ulasan. Nama restoran dan realisasinya masuk Bab IV/lampiran.
-   `fakta.py` mengambil n dari konfigurasi.
-7. **Iterasi 1 dan 2:** iterasi 1 adalah keadaan kode inti saat ini; iterasi 2 setelah perbaikan dari
-   evaluasi. Dengan data contoh, catatan iterasi ditandai `data_contoh: true` agar tidak dikutip
-   sebagai hasil penelitian.
+5. **8 restoran (disetujui Abdi: "pakai saran"):** 8 dipilih dari 18 restoran aktif dengan
+   *purposive sampling* dua tahap dan kriteria tertulis di `config/default.yaml`
+   (`sampling: {n_restoran: 8, rentang_tahun: [2021, 2026], maks_per_kategori: 2}`):
+   urut menurut jumlah ulasan dalam rentang tahun, ambil berurutan dengan paling banyak 2 per
+   kategori. Pemilihan adalah fungsi deterministik `rra.io_layer.scope.pilih_sampel` yang dipakai
+   oleh `fakta.py`, endpoint `/data`, dan `scripts/pilih_restoran.py --tulis` (mengisi kolom
+   `sampel` di `restaurants.csv`). Data mentah tidak ada di container ini, sehingga Abdi
+   menjalankan skrip itu di mesinnya. Sampai skrip dijalankan, dashboard menampilkan
+   "pemilihan sampel menunggu data". U-09 (`test_data_scope.py`) diubah menjadi berbasis konfigurasi
+   dan diuji dengan data buatan, sehingga uji menjadi lebih ketat, tidak dilemahkan.
+6. **Target ulasan:** dihitung dari data, yaitu `min(tersedia dalam rentang, 625)` per restoran
+   terpilih, dengan target total = jumlahnya. Angka ini tidak dipaksakan ke 5.000, karena rata-rata
+   yang terkumpul ±380 per restoran. Bab III memuat teknik, kriteria, n = 8, dan rumus target;
+   nama dan angka akhir dibangkitkan `fakta.py`. Keterbatasan Wilcoxon dengan n = 8 (p minimum
+   1/256) dan granularitas ρ pada 5 aspek dicatat di Bab III.
+7. **Iterasi 1 dan 2 (keputusan pelaksana):** hanya mekanismenya yang dibangun.
+   Iterasi 1 dicatat dari data contoh dengan tanda `data_contoh: true`. Iterasi 2 dijalankan Abdi
+   setelah perbaikan nyata pada data asli. Selisih tidak dikarang. "Selesai" untuk iterasi berarti
+   mekanisme serta halaman perbandingan berfungsi.
+7a. **Keterlacakan (keputusan pelaksana):** setiap kasus uji di `kebutuhan.yaml` punya
+   `jenis: otomatis|manual`. Kasus otomatis harus punya uji ber-marker `req`. Kasus manual (KNF-02
+   offline sebagian, KNF-04 Firefox/Edge, KNF-05 perangkat) harus punya berkas bukti
+   `reports/manual/<kode>.json`. Uji peramban memakai Playwright **Python** agar masuk `pytest.xml`.
+7b. **Uji kritis H2 (keputusan pelaksana):** semua kasus uji yang terpetakan ke FR-01..FR-08.
+   Definisi ini ditulis eksplisit di Bab III.
 8. **Bab III dirombak** mengikuti urutan diagram (studi literatur sebelum pengumpulan data, anotasi
    sebagai subbab sendiri, SDLC Prototipe dengan empat langkahnya, pengujian, validasi pakar,
    analisis). Gambar 3.1 dibangkitkan ulang sesuai diagram; Gambar 3.3 (arsitektur) dan 3.8
