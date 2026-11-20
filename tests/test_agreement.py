@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 import importlib.util
 from pathlib import Path
 
 import pandas as pd
 
 from rra.analysis import agreement
+
+pytestmark = pytest.mark.kasus("U-10")
 
 ROOT = Path(__file__).resolve().parents[1]
 

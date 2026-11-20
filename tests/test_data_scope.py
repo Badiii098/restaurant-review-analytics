@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from rra.io_layer.scope import load_active_restaurants, shortfall
+
+pytestmark = pytest.mark.kasus("U-09")
 
 ROOT = Path(__file__).resolve().parents[1]
 RESTAURANTS = ROOT / "config" / "restaurants.csv"

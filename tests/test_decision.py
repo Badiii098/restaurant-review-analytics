@@ -12,6 +12,8 @@ from rra.decision.rules import FALLBACK, recommend_action, rules_for
 from rra.decision.severity import review_severity, severity_map
 from rra.contracts import RawReview
 
+pytestmark = pytest.mark.kasus("U-04", "U-05", "U-06")
+
 
 # --------------------------------------------------------------------------- #
 # Keparahan

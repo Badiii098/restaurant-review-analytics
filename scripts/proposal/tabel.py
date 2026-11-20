@@ -5,7 +5,30 @@ Setiap tabel: judul (tanpa nomor), kolom, baris, sumber, dan lebar relatif kolom
 
 from __future__ import annotations
 
-from scripts.proposal.fakta import angka, fakta
+from scripts.proposal.fakta import ROOT, angka, fakta
+
+
+def _katalog():
+    import sys
+    sys.path.insert(0, str(ROOT / "src"))
+    from rra.requirements import muat_katalog
+    return muat_katalog(ROOT / "config" / "kebutuhan.yaml")
+
+
+def _baris_kebutuhan() -> list[list[str]]:
+    """Tabel 3.2 dibaca dari config/kebutuhan.yaml agar naskah dan kode tidak berbeda."""
+    return [[k["kode"], k["uraian"], k["kriteria"], ", ".join(k["kasus"])]
+            for k in _katalog().kebutuhan]
+
+
+def _baris_kasus() -> list[list[str]]:
+    """Tabel 3.4: kasus uji otomatis beserta berkasnya dan kebutuhan yang diuji."""
+    kat = _katalog()
+    tingkat = {"unit": "Unit", "integrasi": "Integrasi", "sistem": "Sistem",
+               "nonfungsional": "Non-fungsional"}
+    return [[c["kode"], tingkat[c["tingkat"]], c["nama"], c.get("berkas") or c.get("bukti", ""),
+             ", ".join(k["kode"] for k in kat.kebutuhan if c["kode"] in k["kasus"])]
+            for c in kat.kasus if c["jenis"] == "otomatis"]
 
 
 def _sampel() -> dict:
@@ -88,21 +111,7 @@ def tabel() -> dict[str, dict]:
     "3.2": {"judul": "Katalog kebutuhan fungsional dan non-fungsional",
         "kolom": ["Kode", "Kebutuhan", "Kriteria lulus", "Kasus uji"],
         "lebar": [1.4, 4.4, 4.4, 1.6],
-        "baris": [
-            ["FR-01", "Memuat dan memvalidasi berkas ulasan (review_id, teks, rating, tanggal, restoran)", "Berkas tidak sah ditolak dengan pesan yang menuntun", "U-01, S-01"],
-            ["FR-02", "Membersihkan teks berbahasa Indonesia dan memecah klausa", "Negasi tidak melintasi batas klausa; singkatan dipetakan", "U-02"],
-            ["FR-03", "Mengklasifikasi aspek (multi-label) dan sentimen per aspek", "Setiap ulasan memperoleh prediksi sesuai kontrak", "U-03, I-01"],
-            ["FR-04", "Menghitung skor prioritas lima aspek dan menyimpan komponennya", "100% baris prioritas memuat volume, keparahan, keragaman, bobot", "U-04, I-02"],
-            ["FR-05", "Mengekstraksi frasa keluhan dominan per aspek", "Lima frasa teratas per aspek, dapat ditelusuri ke ulasan", "U-05"],
-            ["FR-06", "Menyusun rekomendasi tindakan dari frasa pemicu", "Setiap rekomendasi memuat aspek, pemicu, tindakan", "U-06"],
-            ["FR-07", "Menyimpan hasil ke basis data lokal dan menampilkannya di halaman", "Halaman memuat hasil terakhir tanpa menghitung ulang", "S-02, S-03"],
-            ["FR-08", "Menguji sensitivitas bobot dan kesesuaian dengan pakar", "Enam skenario sensitivitas; ρ per restoran dan uji Wilcoxon", "U-07, U-08"],
-            ["KNF-01", "Waktu analisis 1.000 ulasan", "Rata-rata ≤ 60 detik dari lima ulangan", "N-01"],
-            ["KNF-02", "Berjalan tanpa jaringan", "Halaman dan analisis ulang berjalan dengan jaringan dimatikan", "N-02"],
-            ["KNF-03", "Latency muat halaman", "≤ 3 detik sampai peringkat tampil", "N-03"],
-            ["KNF-04", "Kompatibilitas peramban", "Tampil benar di Chrome, Firefox, Edge", "N-04"],
-            ["KNF-05", "Lingkungan", "Uji lulus di Python 3.11 dan 3.12 serta perangkat uji yang dicatat", "N-05"],
-        ], "sumber": "Rancangan penelitian (2026), docs/PENGUJIAN.md"},
+        "baris": _baris_kebutuhan(), "sumber": "Rancangan penelitian (2026), docs/PENGUJIAN.md"},
     "3.3": {"judul": "Hipotesis, prosedur uji, dan kriteria keputusan",
         "kolom": ["RM", "H0", "H1", "Prosedur dan kriteria", "Bila H0 tidak ditolak"],
         "lebar": [0.8, 2.6, 2.6, 3.6, 2.6],
@@ -114,22 +123,7 @@ def tabel() -> dict[str, dict]:
     "3.4": {"judul": "Kasus uji dan berkas pengujian",
         "kolom": ["Kode", "Tingkat", "Yang diuji", "Berkas uji", "Kebutuhan"],
         "lebar": [1.1, 1.4, 4.2, 3.0, 1.4],
-        "baris": [
-            ["U-01", "Unit", "Kontrak data antar-lapis tidak berubah diam-diam", "test_contracts.py", "FR-01"],
-            ["U-02", "Unit", "Praproses: negasi, batas klausa, singkatan", "test_preprocess.py", "FR-02"],
-            ["U-03", "Unit", "Komponen SVM memenuhi kontrak, termasuk aspek yang muncul di semua contoh", "test_models.py", "FR-03"],
-            ["U-04", "Unit", "Keparahan monoton terhadap rating; skor prioritas dan normalisasi", "test_decision.py", "FR-04"],
-            ["U-05", "Unit", "Frasa keluhan dominan per aspek", "test_decision.py", "FR-05"],
-            ["U-06", "Unit", "Aturan rekomendasi", "test_decision.py", "FR-06"],
-            ["U-07", "Unit", "Sensitivitas bobot ±10% dan normalisasi bobot", "test_sensitivity.py", "FR-08"],
-            ["U-08", "Unit", "ρ per restoran, uji Wilcoxon, kesesuaian peringkat pertama", "test_expert.py", "FR-08"],
-            ["U-09", "Unit", "Cakupan 18 restoran dan laporan kekurangan", "test_data_scope.py", "FR-01"],
-            ["I-01", "Integrasi", "Validasi silang dan metrik (aspek tanpa dukungan dihitung nol)", "test_evaluate.py", "FR-03"],
-            ["I-02", "Integrasi", "Alur menyeluruh dan masukan tidak sempurna", "test_pipeline.py", "FR-04"],
-            ["S-01", "Sistem", "Perintah baris perintah dijalankan sebagai proses terpisah", "test_cli.py", "FR-01"],
-            ["S-02", "Sistem", "Komponen tampilan dan format skor 0–100", "test_ui_components.py", "FR-07"],
-            ["S-03", "Sistem", "Halaman terbentuk dari basis data hasil, termasuk hasil arsip", "test_ui_page.py", "FR-07"],
-        ], "sumber": "Repositori restaurant-review-analytics, folder tests (2026)"},
+        "baris": _baris_kasus(), "sumber": "Repositori restaurant-review-analytics, folder tests (2026)"},
     "3.5": {"judul": "Skenario pengujian non-fungsional",
         "kolom": ["Kode", "Kondisi", "Langkah", "Kriteria lulus", "Bukti"],
         "lebar": [1.1, 2.5, 3.5, 2.4, 2.3],

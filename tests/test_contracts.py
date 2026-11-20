@@ -17,6 +17,8 @@ from rra.contracts import (
     TrainingExample,
 )
 
+pytestmark = pytest.mark.kasus("U-01")
+
 
 def test_taxonomy_is_fixed_and_ordered() -> None:
     assert ASPECTS == ("makanan", "pelayanan", "harga", "suasana", "fasilitas")

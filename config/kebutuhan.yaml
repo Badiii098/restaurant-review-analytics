@@ -1,0 +1,44 @@
+# =====================================================================
+#  Katalog kebutuhan (FR/KNF) dan kasus uji — satu-satunya sumber.
+#  Dibaca oleh: rra.requirements (API, keputusan H1/H2),
+#  tests/test_traceability.py, dan scripts/proposal/tabel.py (Tabel 3.2, 3.4).
+#  kritis: true  → dihitung sebagai "uji kritis" pada H2 (semua kasus FR).
+# =====================================================================
+
+kebutuhan:
+  - {kode: FR-01, uraian: "Memuat dan memvalidasi berkas ulasan (review_id, teks, rating, tanggal, restoran)", kriteria: "Berkas tidak sah ditolak dengan pesan yang menuntun", kasus: [U-01, U-09, S-01]}
+  - {kode: FR-02, uraian: "Membersihkan teks berbahasa Indonesia dan memecah klausa", kriteria: "Negasi tidak melintasi batas klausa; singkatan dipetakan", kasus: [U-02]}
+  - {kode: FR-03, uraian: "Mengklasifikasi aspek (multi-label) dan sentimen per aspek", kriteria: "Setiap ulasan memperoleh prediksi sesuai kontrak", kasus: [U-03, U-10, I-01]}
+  - {kode: FR-04, uraian: "Menghitung skor prioritas lima aspek dan menyimpan komponennya", kriteria: "100% baris prioritas memuat volume, keparahan, keragaman, bobot", kasus: [U-04, I-02]}
+  - {kode: FR-05, uraian: "Mengekstraksi frasa keluhan dominan per aspek", kriteria: "Lima frasa teratas per aspek, dapat ditelusuri ke ulasan", kasus: [U-05]}
+  - {kode: FR-06, uraian: "Menyusun rekomendasi tindakan dari frasa pemicu", kriteria: "Setiap rekomendasi memuat aspek, pemicu, tindakan", kasus: [U-06]}
+  - {kode: FR-07, uraian: "Menyimpan hasil ke basis data lokal dan menampilkannya di halaman", kriteria: "Halaman memuat hasil terakhir tanpa menghitung ulang", kasus: [S-02, S-03]}
+  - {kode: FR-08, uraian: "Menguji sensitivitas bobot dan kesesuaian dengan pakar", kriteria: "Enam skenario sensitivitas; ρ per restoran dan uji Wilcoxon", kasus: [U-07, U-08]}
+  - {kode: KNF-01, uraian: "Waktu analisis 1.000 ulasan", kriteria: "Rata-rata ≤ 60 detik dari lima ulangan", kasus: [N-01]}
+  - {kode: KNF-02, uraian: "Berjalan tanpa jaringan", kriteria: "Halaman dan analisis ulang berjalan dengan jaringan dimatikan", kasus: [N-02]}
+  - {kode: KNF-03, uraian: "Latency muat halaman", kriteria: "≤ 3 detik sampai peringkat tampil", kasus: [N-03]}
+  - {kode: KNF-04, uraian: "Kompatibilitas peramban", kriteria: "Tampil benar di Chrome, Firefox, Edge", kasus: [N-04]}
+  - {kode: KNF-05, uraian: "Lingkungan", kriteria: "Uji lulus di Python 3.11 dan 3.12 serta perangkat uji yang dicatat", kasus: [N-05]}
+
+kasus:
+  - {kode: U-01, tingkat: unit, jenis: otomatis, kritis: true, nama: "Kontrak data antar-lapis tidak berubah diam-diam", berkas: test_contracts.py}
+  - {kode: U-02, tingkat: unit, jenis: otomatis, kritis: true, nama: "Praproses: negasi, batas klausa, singkatan", berkas: test_preprocess.py}
+  - {kode: U-03, tingkat: unit, jenis: otomatis, kritis: true, nama: "Komponen SVM memenuhi kontrak", berkas: test_models.py}
+  - {kode: U-04, tingkat: unit, jenis: otomatis, kritis: true, nama: "Keparahan monoton terhadap rating; skor prioritas dan normalisasi", berkas: test_decision.py}
+  - {kode: U-05, tingkat: unit, jenis: otomatis, kritis: true, nama: "Frasa keluhan dominan per aspek", berkas: test_decision.py}
+  - {kode: U-06, tingkat: unit, jenis: otomatis, kritis: true, nama: "Aturan rekomendasi", berkas: test_decision.py}
+  - {kode: U-07, tingkat: unit, jenis: otomatis, kritis: true, nama: "Sensitivitas bobot ±10% dan normalisasi bobot", berkas: test_sensitivity.py}
+  - {kode: U-08, tingkat: unit, jenis: otomatis, kritis: true, nama: "ρ per restoran, uji Wilcoxon, kesesuaian peringkat pertama", berkas: test_expert.py}
+  - {kode: U-09, tingkat: unit, jenis: otomatis, kritis: true, nama: "Cakupan kandidat, pemilihan sampel purposive 8 restoran, laporan kekurangan", berkas: test_data_scope.py}
+  - {kode: U-10, tingkat: unit, jenis: otomatis, kritis: true, nama: "Kesepakatan antar-anotator (κ Cohen)", berkas: test_agreement.py}
+  - {kode: U-13, tingkat: unit, jenis: otomatis, kritis: false, nama: "Keterlacakan kebutuhan ke kasus uji", berkas: test_traceability.py}
+  - {kode: I-01, tingkat: integrasi, jenis: otomatis, kritis: true, nama: "Validasi silang dan metrik (aspek tanpa dukungan dihitung nol)", berkas: test_evaluate.py}
+  - {kode: I-02, tingkat: integrasi, jenis: otomatis, kritis: true, nama: "Alur menyeluruh dan masukan tidak sempurna", berkas: test_pipeline.py}
+  - {kode: S-01, tingkat: sistem, jenis: otomatis, kritis: true, nama: "Perintah baris perintah dijalankan sebagai proses terpisah", berkas: test_cli.py}
+  - {kode: S-02, tingkat: sistem, jenis: otomatis, kritis: true, nama: "Komponen tampilan dan format skor 0–100", berkas: test_ui_components.py}
+  - {kode: S-03, tingkat: sistem, jenis: otomatis, kritis: true, nama: "Halaman terbentuk dari basis data hasil", berkas: test_ui_page.py}
+  - {kode: N-01, tingkat: nonfungsional, jenis: manual, kritis: false, nama: "Benchmark lima ulangan 1.000 ulasan", bukti: reports/benchmark.json}
+  - {kode: N-02, tingkat: nonfungsional, jenis: manual, kritis: false, nama: "Halaman dan analisis ulang tanpa jaringan", bukti: reports/manual/N-02.json}
+  - {kode: N-03, tingkat: nonfungsional, jenis: manual, kritis: false, nama: "Waktu sampai peringkat tampil ≤ 3 detik", bukti: reports/manual/N-03.json}
+  - {kode: N-04, tingkat: nonfungsional, jenis: manual, kritis: false, nama: "Tampil di Chrome, Firefox, Edge", bukti: reports/manual/N-04.json}
+  - {kode: N-05, tingkat: nonfungsional, jenis: manual, kritis: false, nama: "Lulus di Python 3.11 dan 3.12 serta perangkat yang dicatat", bukti: reports/manual/N-05.json}

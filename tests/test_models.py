@@ -14,6 +14,8 @@ from rra.contracts import ASPECTS, SENTIMENTS
 from rra.models.base import AspectSentimentModel
 from rra.models.registry import available_models, build_model, get_model_class
 
+pytestmark = pytest.mark.kasus("U-03")
+
 MODEL_NAMES = sorted(available_models())
 
 

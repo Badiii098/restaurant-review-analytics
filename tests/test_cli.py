@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.kasus("S-01")
+
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
 

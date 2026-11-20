@@ -70,3 +70,16 @@ def small_labels() -> tuple[list[str], list[list[str]], list[dict[str, str]]]:
         {"fasilitas": "negatif", "suasana": "negatif"}, {"suasana": "positif"},
     ]
     return texts, aspects, sentiments
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    config.addinivalue_line(
+        "markers", "kasus(*kode): kode kasus uji di config/kebutuhan.yaml (keterlacakan H1)")
+
+
+@pytest.fixture(autouse=True)
+def _catat_kasus(request: pytest.FixtureRequest, record_property) -> None:  # noqa: ANN001
+    """Tulis kode kasus ke properti junit agar dashboard dapat membaca status per kasus."""
+    kode = [k for mark in request.node.iter_markers("kasus") for k in mark.args]
+    if kode:
+        record_property("kasus", ",".join(sorted(set(kode))))
