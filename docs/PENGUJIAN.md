@@ -64,11 +64,15 @@ pytest tests -q
 | Modul keputusan (keparahan, prioritas, frasa, aturan) | `test_decision.py` | unit |
 | Uji sensitivitas bobot ±10% | `test_sensitivity.py` | unit |
 | Kesesuaian dengan pakar | `test_expert.py` | unit |
-| Cakupan sampel 18 restoran | `test_data_scope.py` | unit |
+| Kandidat aktif dan pemilihan sampel purposive 8 restoran | `test_data_scope.py` | unit |
 | Evaluasi model (pendukung) | `test_evaluate.py` | integrasi |
 | Alur menyeluruh | `test_pipeline.py` | integrasi |
 | Antarmuka baris perintah | `test_cli.py` | sistem (kotak hitam, `subprocess`) |
-| Komponen dan halaman antarmuka | `test_ui_components.py`, `test_ui_page.py` | sistem |
+| API per tahap dan kesamaan angka dengan basis data | `test_api.py` | sistem |
+| Sepuluh halaman di peramban, KNF-03 | `test_e2e_web.py` | sistem |
+| Keterlacakan kebutuhan → kasus uji (H1) | `test_traceability.py` | unit |
+| κ, iterasi, keputusan hipotesis | `test_agreement.py`, `test_iterations.py`, `test_hypotheses.py` | unit |
+| Komponen antarmuka (skor 0–100, navigasi) | `frontend/src/**/*.test.tsx` (Vitest) | unit |
 
 ## 5. Evaluasi model (pendukung, bukan hipotesis)
 

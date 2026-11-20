@@ -34,7 +34,8 @@ flowchart TD
     end
 
     subgraph L5["Lapisan 5 — Penyajian & Antarmuka"]
-        E1[app.streamlit_app]
+        E1[api.app + services.tahap<br/>FastAPI /api/v1]
+        E4[frontend/<br/>klien React]
         E2[report.report<br/>CSV & Markdown]
         E3[cli<br/>antarmuka baris perintah]
     end
@@ -196,13 +197,18 @@ rekomendasi tindakan harus dapat dipertanggungjawabkan oleh manusia.
 
 | Aspek | Keterangan |
 |---|---|
-| Berkas | `app/streamlit_app.py`, `report/report.py`, `cli.py` |
-| Peran | **lapisan tipis** — hanya memanggil `Pipeline` dan menampilkan hasilnya |
+| Berkas | 5a: `api/app.py`, `api/schemas.py`, `services/tahap.py`, `cli.py`, `report/report.py` · 5b: `frontend/src` |
+| Peran | **lapisan tipis** — 5a membaca bukti tiap tahap (basis data, `reports/`, `config/`) dan menyajikannya sebagai JSON; 5b hanya menampilkan JSON itu |
 | Kontrak | tidak ada logika keputusan di lapisan ini |
 | Alasan | bila ada logika bisnis di sini, angka di layar dapat menyimpang dari arsip; seluruh angka dibaca dari basis data. |
 
 Antarmuka menampilkan skor prioritas pada skala 0–100 (skor tersimpan 0–1
-dikalikan 100 saat tampil) dan tidak menyediakan pemilih model.
+dikalikan 100 saat tampil) dan tidak menyediakan pemilih model. Respons
+`/api/v1/hasil` memakai dataclass `AspectPriority` dari `contracts.py` sebagai
+model respons, sehingga skema OpenAPI (`docs/openapi.json`) tidak dapat
+menyimpang dari kontrak. Bila bukti suatu tahap belum ada, API menjawab
+`status: belum_tersedia` beserta perintah pembuatnya; angka tidak pernah
+diperkirakan. Klien dibundel penuh (tanpa CDN) sehingga KNF-02 terpenuhi.
 
 ## 3. Mengapa lima lapisan, bukan satu skrip
 

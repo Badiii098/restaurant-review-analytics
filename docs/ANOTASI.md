@@ -71,12 +71,13 @@ periksa dari atas, pakai yang pertama berlaku.
 1. Bentuk berkas kerja:
 
    ```bash
-   python scripts/make_annotation_template.py --overlap 150 --each 400
+   python scripts/make_annotation_template.py --overlap 500 --each 500
    ```
 
-   Menghasilkan `data/reference/anotator_1.csv` dan `anotator_2.csv`. Sebanyak
-   150 ulasan (dapat diubah) muncul di **kedua** berkas; sisanya berbeda.
-   Bagian tumpang tindih itulah bahan penghitungan κ.
+   Menghasilkan `data/reference/anotator_1.csv` dan `anotator_2.csv` berisi
+   **500 ulasan yang sama** (rancangan penelitian: kedua anotator melabeli
+   seluruh 500 ulasan). κ dihitung atas seluruh 500 ulasan itu, lalu label
+   yang berbeda diselesaikan melalui diskusi sebelum dipakai sebagai data latih.
 
 2. Pemberi label **bekerja terpisah** dan **tidak** mendiskusikan ulasan yang
    sedang dinilai. Berdiskusi sebelum menghitung κ akan menggelembungkan

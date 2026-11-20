@@ -29,9 +29,9 @@ COLUMNS = ["review_id", "text", "aspect", "sentiment"]
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--overlap", type=int, default=150,
+    parser.add_argument("--overlap", type=int, default=500,
                         help="Jumlah ulasan yang dilabeli oleh KEDUA pemberi label.")
-    parser.add_argument("--each", type=int, default=400,
+    parser.add_argument("--each", type=int, default=500,
                         help="Jumlah ulasan per pemberi label (termasuk overlap).")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--root", default=str(ROOT))
