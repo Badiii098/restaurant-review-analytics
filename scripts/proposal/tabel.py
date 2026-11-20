@@ -32,16 +32,21 @@ def _baris_kasus() -> list[list[str]]:
 
 
 def _sampel() -> dict:
-    f = fakta()
-    baris = [[p["kode"], p["nama"], p["kota"], p["kategori"], angka(p["target"]),
-              angka(p["terkumpul"]), angka(p["kurang"]) if p["kurang"] else "–"]
-             for p in f["per_restoran"]]
-    baris.append(["", "Jumlah 18 restoran", "", "", angka(f["target_total"]), angka(f["total"]),
-                  angka(sum(p["kurang"] for p in f["per_restoran"]))])
-    return {"judul": "Rencana sampel dan realisasi ulasan per restoran",
-            "kolom": ["Kode", "Restoran", "Kota", "Kategori", "Target", "Terkumpul", "Kurang"],
-            "baris": baris, "lebar": [1.0, 3.3, 1.8, 2.1, 1.1, 1.4, 1.1], "footer": True,
-            "sumber": "Hasil pengambilan data Google Maps, Oktober 2026 (config/restaurants.csv, data/raw/maps)"}
+    """Tabel 3.1: kriteria purposive dan realisasi delapan restoran sampel."""
+    s = fakta()["sampling"]
+    baris = [[r["kode"], r["nama"], r["kota"], r["kategori"], angka(r["tersedia"]), angka(r["target"])]
+             for r in s["restoran"]]
+    if baris:
+        baris.append(["", f"Jumlah {len(baris)} restoran", "", "",
+                      angka(sum(r["tersedia"] for r in s["restoran"])), angka(s["target_total"])])
+    else:
+        baris.append(["–", "Ditetapkan setelah pengambilan data (scripts/pilih_restoran.py)", "–", "–", "–", "–"])
+    return {"judul": f"Sampel purposive {s['n']} restoran dan target ulasan",
+            "kolom": ["Kode", "Restoran", "Kota", "Kategori", f"Ulasan {s['rentang'][0]}–{s['rentang'][1]}", "Target"],
+            "baris": baris, "lebar": [1.0, 3.6, 1.8, 2.2, 1.6, 1.2], "footer": bool(s["restoran"]),
+            "sumber": (f"Kriteria: urut jumlah ulasan {s['rentang'][0]}–{s['rentang'][1]}, maksimal "
+                       f"{s['maks_per_kategori']} per kategori; target = min(tersedia, {angka(s['batas_target'])}) "
+                       "(config/default.yaml, config/restaurants.csv, data/raw/maps)")}
 
 
 def tabel() -> dict[str, dict]:
@@ -129,9 +134,9 @@ def tabel() -> dict[str, dict]:
         "lebar": [1.1, 2.5, 3.5, 2.4, 2.3],
         "baris": [
             ["N-01", "1.000 ulasan, perangkat uji Tabel 3.6", "Jalankan benchmark lima kali, cache dibersihkan antar-ulangan", "Rata-rata ≤ 60 detik", "reports/benchmark.json"],
-            ["N-02", "Jaringan dimatikan", "Buka halaman, tekan hitung ulang analisis", "Peringkat tampil dan hasil baru tersimpan", "Tangkapan layar, baris runs baru"],
-            ["N-03", "Basis data berisi hasil", "Ukur waktu dari muat halaman sampai tabel peringkat tampil, lima ulangan", "≤ 3 detik", "Catatan pengukuran peramban"],
-            ["N-04", "Chrome, Firefox, Edge versi terbaru", "Buka halaman, periksa keempat bagian laporan", "Seluruh bagian tampil tanpa galat", "Tangkapan layar per peramban"],
+            ["N-02", "Jaringan dimatikan", "Buka halaman, tekan hitung ulang analisis", "Peringkat tampil dan hasil baru tersimpan", "reports/manual/N-02.json, baris runs baru"],
+            ["N-03", "Basis data berisi hasil", "Uji Playwright otomatis: waktu dari permintaan halaman sampai baris peringkat pertama tampil, lima ulangan", "Rata-rata ≤ 3 detik", "reports/pytest.xml (test_e2e_web.py)"],
+            ["N-04", "Chrome, Firefox, Edge versi terbaru", "Buka sepuluh halaman tahapan, periksa tampilan dan galat konsol", "Seluruh halaman tampil tanpa galat", "reports/manual/N-04.json + tangkapan layar"],
             ["N-05", "Python 3.11 dan 3.12", "Jalankan seluruh uji pada CI dan perangkat uji", "Seluruh uji lulus", "Riwayat GitHub Actions"],
         ], "sumber": "Rancangan penelitian (2026), docs/PENGUJIAN.md"},
     "3.6": {"judul": "Alat penelitian",
@@ -145,10 +150,13 @@ def tabel() -> dict[str, dict]:
             ["Perangkat lunak", "Python", "≥ 3.11", "Bahasa pemrograman"],
             ["Perangkat lunak", "scikit-learn", "≥ 1.5", "TF-IDF, SVM linear, validasi silang"],
             ["Perangkat lunak", "pandas, NumPy, SciPy", "≥ 2.2, ≥ 2.0, ≥ 1.13", "Pengolahan data dan uji statistik"],
-            ["Perangkat lunak", "Streamlit", "≥ 1.40", "Antarmuka prototipe"],
+            ["Perangkat lunak", "FastAPI dan Uvicorn", "≥ 0.115, ≥ 0.30", "API REST lapis 5a dan skema OpenAPI"],
+            ["Perangkat lunak", "React, TypeScript, Vite", "18.3, 5.6, 5.4", "Antarmuka web lapis 5b"],
+            ["Perangkat lunak", "Node.js", "≥ 22", "Membangun antarmuka web"],
+            ["Perangkat lunak", "Vitest", "2.1", "Uji komponen antarmuka"],
             ["Perangkat lunak", "SQLite", "≥ 3.40", "Basis data hasil dan jejak audit"],
             ["Perangkat lunak", "pytest", "≥ 8.0", "Uji unit, integrasi, sistem"],
-            ["Perangkat lunak", "Playwright", "≥ 1.45", "Pengambilan data Google Maps"],
+            ["Perangkat lunak", "Playwright", "≥ 1.45", "Pengambilan data Google Maps dan uji sistem di peramban"],
             ["Perangkat lunak", "Git dan GitHub Actions", "≥ 2.40", "Kendali versi dan integrasi berkelanjutan"],
             ["Perangkat lunak", "Chrome, Firefox, Edge", "Versi terbaru", "Uji kompatibilitas peramban"],
         ], "sumber": "Dokumentasi perangkat penelitian dan requirements.txt (2026)"},
@@ -156,29 +164,28 @@ def tabel() -> dict[str, dict]:
         "kolom": ["Bahan", "Jumlah", "Keterangan"],
         "lebar": [3.6, 2.2, 6.0],
         "baris": [
-            ["Restoran kandidat", f"{f['n_kandidat']} restoran", "Daftar purposive restoran berulasan banyak di Jabodetabek"],
-            ["Restoran dianalisis", f"{f['n_restoran']} restoran", "Jakarta Pusat 12, Jakarta Selatan 3, Jakarta Utara 1, Bekasi 1, Tangerang 1"],
-            ["Restoran dikeluarkan", f"{len(f['keluar'])} restoran", "Enam restoran dengan ulasan terkumpul < 210 dan satu restoran tanpa data"],
-            ["Target ulasan", f"{angka(f['target_total'])} ulasan", f"{f['target_per_restoran']} ulasan per restoran; ambang minimum {angka(f['ambang_total'])}"],
-            ["Ulasan terkumpul", f"{angka(f['total'])} ulasan", "Ulasan berteks; tanggal berupa perkiraan dari penanda relatif Google Maps"],
-            ["Ulasan periode 2021–2026", f"{angka(f['dalam_rentang'])} ulasan", f"{angka(100*f['dalam_rentang']/f['total'],1)}% dari ulasan terkumpul"],
-            ["Ulasan berbintang satu dan dua", f"{angka(f['rating_rendah'])} ulasan", f"{angka(100*f['rating_rendah']/f['total'],1)}% dari ulasan terkumpul"],
+            ["Restoran kandidat", f"{f['n_restoran']} restoran", f"Restoran berulasan banyak di Jabodetabek yang lolos syarat awal (dari {f['n_kandidat']} kandidat)"],
+            ["Restoran sampel", f"{f['sampling']['n']} restoran", "Purposive: urut jumlah ulasan dalam rentang tahun, maksimal dua per kategori"],
+            ["Target ulasan", f"{angka(f['sampling']['target_total'])} ulasan" if f['sampling']['restoran'] else "ditetapkan dari data",
+             f"min(tersedia, {angka(f['sampling']['batas_target'])}) per restoran sampel"],
+            ["Ulasan terkumpul", f"{angka(f['total'])} ulasan" if f['total'] else "–", "Ulasan berteks; tanggal berupa perkiraan dari penanda relatif Google Maps"],
+            ["Ulasan berlabel", "500 ulasan", "Dilabeli dua anotator secara terpisah; kappa Cohen tingkat aspek dan sentimen"],
             ["Aspek layanan", "5 aspek", "Makanan, pelayanan, harga, suasana, fasilitas"],
             ["Kelas sentimen", "3 kelas", "Positif, negatif, netral"],
             ["Data berlabel", "Direncanakan", "Dua anotator, minimal 150 ulasan tumpang tindih untuk koefisien kappa"],
-            ["Urutan pakar", "18 restoran", "Urutan lima aspek per restoran dari pakar"],
+            ["Urutan pakar", f"{f['sampling']['n']} restoran", "Urutan lima aspek per restoran sampel dari pakar"],
         ], "sumber": "Hasil pengumpulan data penelitian, Oktober 2026"},
     "3.8": {"judul": "Jadwal penelitian",
         "kolom": ["Kegiatan", "Nov", "Des", "Jan", "Feb", "Mar", "Apr", "Mei"],
         "lebar": [4.4, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9],
         "baris": [
             ["Identifikasi masalah dan studi literatur", "■", "", "", "", "", "", ""],
-            ["Pengumpulan data dan anotasi", "■", "■", "", "", "", "", ""],
+            ["Pengumpulan data (8 restoran) dan anotasi 500 ulasan", "■", "■", "", "", "", "", ""],
             ["Perancangan sistem: analisis kebutuhan dan desain cepat", "■", "■", "", "", "", "", ""],
             ["Iterasi prototipe 1: bangun dan evaluasi", "", "■", "■", "", "", "", ""],
             ["Iterasi prototipe 2: perbaikan dan evaluasi", "", "", "■", "■", "", "", ""],
             ["Pengujian unit, integrasi, sistem", "", "", "", "■", "■", "", ""],
-            ["Pengujian non-fungsional dan uji pakar", "", "", "", "", "■", "■", ""],
+            ["Pengujian non-fungsional dan validasi pakar", "", "", "", "", "■", "■", ""],
             ["Analisis hasil dan penulisan laporan", "", "", "", "", "", "■", "■"],
         ], "sumber": "Rencana penelitian November 2026 – Mei 2027", "tengah_dari": 1},
     }
