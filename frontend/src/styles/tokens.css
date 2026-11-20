@@ -1,4 +1,4 @@
-/* Token warna diturunkan dari app/theme.py (Streamlit lama) agar identitas visual tetap.
+/* Token warna diturunkan dari scripts/arsip/streamlit/theme.py (Streamlit lama) agar identitas visual tetap.
    Seri grafik memakai palet tervalidasi dataviz (slot 1 biru, slot 2 oranye). */
 :root {
   color-scheme: light;
