@@ -107,6 +107,11 @@ def _build_parser() -> argparse.ArgumentParser:
                                help="Tampilkan bahan audit peringkat prioritas.")
     p_explain.add_argument("--db", default=None, help="Berkas basis data hasil (SQLite).")
 
+    p_serve = sub.add_parser("serve", parents=[common],
+                             help="Jalankan API dan dashboard web (http://HOST:PORT).")
+    p_serve.add_argument("--host", default="127.0.0.1", help="Alamat yang didengar.")
+    p_serve.add_argument("--port", type=int, default=8000, help="Port yang didengar.")
+
     p_sens = sub.add_parser("sensitivity", parents=[common],
                             help="Uji sensitivitas bobot prioritas (±10%%).")
     p_sens.add_argument("--delta", type=float, default=0.10, help="Besar geseran relatif bobot.")
@@ -490,7 +495,18 @@ def cmd_sensitivity(args: argparse.Namespace, cfg: Config) -> int:
     return 0
 
 
+def cmd_serve(args: argparse.Namespace, cfg: Config) -> int:
+    import uvicorn  # noqa: PLC0415
+
+    from rra.api.app import create_app  # noqa: PLC0415
+
+    print(f"Dashboard: http://{args.host}:{args.port}  ·  API: http://{args.host}:{args.port}/api/v1/docs")
+    uvicorn.run(create_app(cfg), host=args.host, port=int(args.port), log_level="warning")
+    return 0
+
+
 _COMMANDS = {
+    "serve": cmd_serve,
     "sample-data": cmd_sample_data,
     "run": cmd_run,
     "evaluate": cmd_evaluate,

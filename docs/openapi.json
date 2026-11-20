@@ -1,0 +1,581 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Restaurant Review Analytics",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/api/v1/status": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Status",
+        "operationId": "status_api_v1_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Status Api V1 Status Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Data",
+        "operationId": "data_api_v1_data_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Data Api V1 Data Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/anotasi": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Anotasi",
+        "operationId": "anotasi_api_v1_anotasi_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Anotasi Api V1 Anotasi Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/kebutuhan": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Kebutuhan",
+        "operationId": "kebutuhan_api_v1_kebutuhan_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Kebutuhan Api V1 Kebutuhan Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/desain": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Desain",
+        "operationId": "desain_api_v1_desain_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Desain Api V1 Desain Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/iterasi": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Iterasi",
+        "operationId": "iterasi_api_v1_iterasi_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Iterasi Api V1 Iterasi Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sensitivitas": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Sensitivitas",
+        "operationId": "sensitivitas_api_v1_sensitivitas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Sensitivitas Api V1 Sensitivitas Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pengujian": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Pengujian",
+        "operationId": "pengujian_api_v1_pengujian_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Pengujian Api V1 Pengujian Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pakar": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Pakar",
+        "operationId": "pakar_api_v1_pakar_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Pakar Api V1 Pakar Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hipotesis": {
+      "get": {
+        "tags": [
+          "tahap"
+        ],
+        "summary": "Hipotesis",
+        "operationId": "hipotesis_api_v1_hipotesis_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Hipotesis Api V1 Hipotesis Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hasil/terakhir": {
+      "get": {
+        "tags": [
+          "hasil"
+        ],
+        "summary": "Hasil Terakhir",
+        "operationId": "hasil_terakhir_api_v1_hasil_terakhir_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hasil"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hasil/{run_id}": {
+      "get": {
+        "tags": [
+          "hasil"
+        ],
+        "summary": "Hasil Nomor",
+        "operationId": "hasil_nomor_api_v1_hasil__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hasil"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analisis": {
+      "post": {
+        "tags": [
+          "hasil"
+        ],
+        "summary": "Analisis",
+        "operationId": "analisis_api_v1_analisis_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalisisBaru"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalisisBaru": {
+        "properties": {
+          "run_id": {
+            "type": "integer",
+            "title": "Run Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id"
+        ],
+        "title": "AnalisisBaru"
+      },
+      "AspectPriority": {
+        "properties": {
+          "aspect": {
+            "type": "string",
+            "title": "Aspect"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "priority": {
+            "type": "number",
+            "title": "Priority"
+          },
+          "volume": {
+            "type": "number",
+            "title": "Volume"
+          },
+          "severity": {
+            "type": "number",
+            "title": "Severity"
+          },
+          "diversity": {
+            "type": "number",
+            "title": "Diversity"
+          },
+          "n_negative": {
+            "type": "integer",
+            "title": "N Negative"
+          },
+          "n_total": {
+            "type": "integer",
+            "title": "N Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "aspect",
+          "label",
+          "rank",
+          "priority",
+          "volume",
+          "severity",
+          "diversity",
+          "n_negative",
+          "n_total"
+        ],
+        "title": "AspectPriority",
+        "description": "Skor prioritas satu aspek beserta komponen pembentuknya.\n\nSeluruh komponen disimpan agar setiap angka dapat ditelusuri asalnya —\ninilah sifat *dapat diaudit* yang menjadi salah satu kebaruan penelitian."
+      },
+      "Frasa": {
+        "properties": {
+          "aspect": {
+            "type": "string",
+            "title": "Aspect"
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "phrase": {
+            "type": "string",
+            "title": "Phrase"
+          },
+          "frequency": {
+            "type": "integer",
+            "title": "Frequency"
+          },
+          "tfidf_weight": {
+            "type": "number",
+            "title": "Tfidf Weight"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "example_review_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Example Review Ids",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "aspect",
+          "rank",
+          "phrase",
+          "frequency",
+          "tfidf_weight",
+          "score"
+        ],
+        "title": "Frasa"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Hasil": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "langkah": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Langkah"
+          },
+          "run": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run"
+          },
+          "prioritas": {
+            "items": {
+              "$ref": "#/components/schemas/AspectPriority"
+            },
+            "type": "array",
+            "title": "Prioritas",
+            "default": []
+          },
+          "frasa": {
+            "items": {
+              "$ref": "#/components/schemas/Frasa"
+            },
+            "type": "array",
+            "title": "Frasa",
+            "default": []
+          },
+          "rekomendasi": {
+            "items": {
+              "$ref": "#/components/schemas/Rekomendasi"
+            },
+            "type": "array",
+            "title": "Rekomendasi",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "Hasil"
+      },
+      "Rekomendasi": {
+        "properties": {
+          "aspect": {
+            "type": "string",
+            "title": "Aspect"
+          },
+          "phrase": {
+            "type": "string",
+            "title": "Phrase"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "evidence": {
+            "type": "string",
+            "title": "Evidence",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "aspect",
+          "phrase",
+          "action"
+        ],
+        "title": "Rekomendasi"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

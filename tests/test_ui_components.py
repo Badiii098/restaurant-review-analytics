@@ -21,7 +21,6 @@ for candidate in (str(ROOT / "src"), str(ROOT / "app")):
 import components as ui  # noqa: E402
 import theme  # noqa: E402
 
-pytestmark = pytest.mark.kasus("S-02")
 
 
 # --------------------------------------------------------------------------- #

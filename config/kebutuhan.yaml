@@ -37,7 +37,7 @@ kasus:
   - {kode: I-01, tingkat: integrasi, jenis: otomatis, kritis: true, nama: "Validasi silang dan metrik (aspek tanpa dukungan dihitung nol)", berkas: test_evaluate.py}
   - {kode: I-02, tingkat: integrasi, jenis: otomatis, kritis: true, nama: "Alur menyeluruh dan masukan tidak sempurna", berkas: test_pipeline.py}
   - {kode: S-01, tingkat: sistem, jenis: otomatis, kritis: true, nama: "Perintah baris perintah dijalankan sebagai proses terpisah", berkas: test_cli.py}
-  - {kode: S-02, tingkat: sistem, jenis: otomatis, kritis: true, nama: "Komponen tampilan dan format skor 0–100", berkas: test_ui_components.py}
+  - {kode: S-02, tingkat: sistem, jenis: otomatis, kritis: true, nama: "API menyajikan setiap tahap dan hasil yang sama dengan basis data", berkas: test_api.py}
   - {kode: S-03, tingkat: sistem, jenis: otomatis, kritis: true, nama: "Halaman terbentuk dari basis data hasil", berkas: test_ui_page.py}
   - {kode: N-01, tingkat: nonfungsional, jenis: manual, kritis: false, nama: "Benchmark lima ulangan 1.000 ulasan", bukti: reports/benchmark.json}
   - {kode: N-02, tingkat: nonfungsional, jenis: manual, kritis: false, nama: "Halaman dan analisis ulang tanpa jaringan", bukti: reports/manual/N-02.json}
