@@ -195,6 +195,9 @@ def g36(t: Path) -> None:
     if not s["restoran"]:
         _kosong(t, "Ulasan per restoran sampel ditampilkan setelah pemilihan sampel\n(python scripts/pilih_restoran.py --tulis)")
         return
+    if any(r["tersedia"] is None for r in s["restoran"]):
+        _kosong(t, "Jumlah ulasan per restoran sampel membutuhkan data/raw/maps di mesin pembangun naskah")
+        return
     data = sorted(s["restoran"], key=lambda r: r["tersedia"])
     fig, ax = plt.subplots(figsize=(6.3, 3.6))
     warna = ["#8A5A15" if r["tersedia"] < s["batas_target"] else "#12564A" for r in data]

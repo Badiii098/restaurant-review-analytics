@@ -68,6 +68,10 @@ pip install -r requirements.txt
 export PYTHONPATH=src
 ```
 
+Di Windows (PowerShell) ganti baris terakhir dengan `$env:PYTHONPATH = "src"`,
+atau pasang paket sekali dengan `pip install -e .` sehingga `python -m rra.cli`
+dan `python -m pytest` berjalan tanpa variabel lingkungan.
+
 Bila memakai [uv](https://docs.astral.sh/uv/):
 
 ```bash

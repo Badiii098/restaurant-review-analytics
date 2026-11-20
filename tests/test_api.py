@@ -144,3 +144,10 @@ def test_endpoint_tahap_tanpa_parameter(klien: TestClient) -> None:
     jalur = klien.get("/api/v1/openapi.json").json()["paths"]
     for nama in ("status", "data", "hipotesis"):
         assert not jalur[f"/api/v1/{nama}"]["get"].get("parameters"), nama
+
+
+def test_langkah_api_portabel(klien: TestClient) -> None:
+    import json as _json
+
+    teks = _json.dumps([klien.get(f"/api/v1/{n}").json() for n in ENDPOINT])
+    assert "PYTHONPATH=" not in teks

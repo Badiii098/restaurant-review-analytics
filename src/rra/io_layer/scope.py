@@ -99,3 +99,54 @@ def pilih_sampel(kandidat: Iterable[Mapping[str, str]], jumlah_dalam_rentang: Ma
 def target_per_restoran(tersedia: int, batas: int) -> int:
     """Target ulasan per restoran: data yang tersedia, dibatasi ``batas``."""
     return min(int(tersedia), int(batas))
+
+
+def ringkas_sampel(daftar: Path, maps_dir: Path, *, n: int, rentang: tuple[int, int],
+                   maks_per_kategori: int, batas: int) -> dict:
+    """Sampel yang dipakai sistem dan naskah: tetapan di ``restaurants.csv`` bila ada,
+    selain itu usulan otomatis dari data mentah, selain itu kosong.
+
+    Bila sampel sudah ditetapkan tetapi data mentah tidak ada (klon baru, CI),
+    target dibaca dari kolom ``target_sampel`` dan ``tersedia`` bernilai ``None``
+    — tidak pernah dihitung ulang menjadi nol.
+    """
+    jumlah = hitung_ulasan_dalam_rentang(maps_dir, rentang)
+    daftar = Path(daftar)
+    ditetapkan = load_sample(daftar) if daftar.exists() else []
+    if ditetapkan:
+        terpilih = ditetapkan
+    elif jumlah and daftar.exists():
+        terpilih = pilih_sampel(load_active_restaurants(daftar), jumlah, n, maks_per_kategori)
+    else:
+        terpilih = []
+    restoran = []
+    for r in terpilih:
+        tersedia = jumlah.get(r["kode"]) if jumlah else None
+        tersimpan = (r.get("target_sampel") or "").strip()
+        if tersimpan.isdigit():
+            target: int | None = int(tersimpan)
+        elif tersedia is not None:
+            target = target_per_restoran(tersedia, batas)
+        else:
+            target = None
+        restoran.append({"kode": r["kode"], "nama": r.get("nama", ""), "kota": r.get("kota", ""),
+                         "kategori": r.get("kategori", ""), "tersedia": tersedia, "target": target})
+    return {"n": n, "rentang": list(rentang), "maks_per_kategori": maks_per_kategori,
+            "batas_target": batas, "ditetapkan": bool(ditetapkan), "restoran": restoran,
+            "target_total": sum(r["target"] or 0 for r in restoran)}
+
+
+def ambil_berstrata(frame, n: int, kolom: str, seed: int):  # noqa: ANN001, ANN201
+    """Sampel acak berstrata proporsional (pembulatan sisa terbesar) menurut ``kolom``."""
+    import pandas as pd
+
+    n = min(int(n), len(frame))
+    ukuran = frame[kolom].fillna("").value_counts().sort_index()
+    kuota = ukuran * n / ukuran.sum()
+    jatah = kuota.astype(int)
+    sisa = n - int(jatah.sum())
+    for kunci in (kuota - jatah).sort_values(ascending=False, kind="stable").index[:sisa]:
+        jatah[kunci] += 1
+    bagian = [frame[frame[kolom].fillna("") == kunci].sample(n=int(k), random_state=seed)
+              for kunci, k in jatah.items() if k > 0]
+    return pd.concat(bagian).sample(frac=1, random_state=seed).reset_index(drop=True)

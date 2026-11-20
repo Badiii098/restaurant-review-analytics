@@ -104,6 +104,9 @@ def test_benchmark_writes_summary(cli_root: Path) -> None:
     result = run_cli(cli_root, "benchmark", "--repeat", "2")
     assert result.returncode == 0, result.stderr
     assert (cli_root / "reports" / "benchmark.json").exists()
+    import json as _json
+    ringkasan = _json.loads((cli_root / "reports" / "benchmark.json").read_text(encoding="utf-8"))["summary"]
+    assert "total_detik_sd" in ringkasan
 
 
 def test_unknown_model_name_is_rejected(cli_root: Path) -> None:

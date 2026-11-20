@@ -44,7 +44,7 @@ def test_ringkas_junit_tanpa_berkas(tmp_path: Path) -> None:
 
 
 def test_h1_tolak_h0_bila_kontrak_lolos_dan_terlacak() -> None:
-    hasil = uji_h1(KATALOG, {"per_kasus": {"U-01": "lulus"}})
+    hasil = uji_h1(KATALOG, {"per_kasus": {"U-01": "lulus", "U-13": "lulus"}})
     assert hasil["status"] == "selesai" and hasil["tolak_h0"] is True
     assert hasil["statistik"] == {"persen_kontrak_lolos": 100.0, "persen_terlacak": 100.0}
 
@@ -85,3 +85,23 @@ def test_tanpa_bukti_belum_tersedia(fungsi: str) -> None:
              "h3": lambda: uji_h3(None)}[fungsi]()
     assert hasil["status"] == "belum_tersedia" and hasil["tolak_h0"] is None
     assert hasil["langkah"]
+
+
+def test_h2_kurang_dari_lima_ulangan_belum_tersedia() -> None:
+    hasil = uji_h2(_benchmark([59.0]), {"per_kasus": {"U-01": "lulus"}}, KATALOG)
+    assert hasil["status"] == "belum_tersedia" and hasil["tolak_h0"] is None
+
+
+def test_h2_melaporkan_simpangan_baku() -> None:
+    hasil = uji_h2(_benchmark([10.0, 11.0, 9.5, 10.2, 10.4]), {"per_kasus": {"U-01": "lulus"}}, KATALOG)
+    assert hasil["statistik"]["sd_detik_per_1000"] == pytest.approx(0.5495, abs=1e-4)
+
+
+def test_h1_tidak_tolak_bila_uji_keterlacakan_gagal() -> None:
+    hasil = uji_h1(KATALOG, {"per_kasus": {"U-01": "lulus", "U-13": "gagal"}})
+    assert hasil["tolak_h0"] is False
+
+
+def test_langkah_tanpa_sintaks_khusus_bash() -> None:
+    for h in (uji_h1(KATALOG, None), uji_h2(None, None, KATALOG), uji_h3(None)):
+        assert "PYTHONPATH=" not in h["langkah"] and "&&" not in h["langkah"]

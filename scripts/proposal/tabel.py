@@ -34,11 +34,14 @@ def _baris_kasus() -> list[list[str]]:
 def _sampel() -> dict:
     """Tabel 3.1: kriteria purposive dan realisasi delapan restoran sampel."""
     s = fakta()["sampling"]
-    baris = [[r["kode"], r["nama"], r["kota"], r["kategori"], angka(r["tersedia"]), angka(r["target"])]
+    def _a(v):  # noqa: ANN001, ANN202
+        return "–" if v is None else angka(v)
+    baris = [[r["kode"], r["nama"], r["kota"], r["kategori"], _a(r["tersedia"]), _a(r["target"])]
              for r in s["restoran"]]
     if baris:
+        tersedia = [r["tersedia"] for r in s["restoran"]]
         baris.append(["", f"Jumlah {len(baris)} restoran", "", "",
-                      angka(sum(r["tersedia"] for r in s["restoran"])), angka(s["target_total"])])
+                      "–" if None in tersedia else angka(sum(tersedia)), angka(s["target_total"])])
     else:
         baris.append(["–", "Ditetapkan setelah pengambilan data (scripts/pilih_restoran.py)", "–", "–", "–", "–"])
     return {"judul": f"Sampel purposive {s['n']} restoran dan target ulasan",

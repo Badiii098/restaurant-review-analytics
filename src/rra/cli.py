@@ -376,6 +376,7 @@ def cmd_benchmark(args: argparse.Namespace, cfg: Config) -> int:
         "n_pengulangan": measured,
         "n_ulasan": n_reviews_last,
         "total_detik_rata_rata": round(_stat.mean(elapsed_values), 4),
+        "total_detik_sd": round(_stat.stdev(elapsed_values), 4) if len(elapsed_values) > 1 else 0.0,
         "total_detik_maks": round(max(elapsed_values), 4),
         "latih_detik_rata_rata": round(_stat.mean(train_values), 4),
         "inferensi_detik_rata_rata": round(_stat.mean(inference_values), 4),

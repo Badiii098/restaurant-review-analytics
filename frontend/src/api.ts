@@ -22,7 +22,7 @@ export interface TahapInfo { kode: string; nama: string; keterangan: string }
 export interface StatusSistem extends Belum {
   versi: string; model: string; basis_data: string; hasil_terakhir: number | null; tahapan: TahapInfo[];
 }
-export interface SampelRestoran { kode: string; nama: string; kota: string; kategori: string; tersedia: number; target: number }
+export interface SampelRestoran { kode: string; nama: string; kota: string; kategori: string; tersedia: number | null; target: number | null }
 export interface Data extends Belum {
   data_contoh: boolean; kandidat: number;
   sampling: { n: number; teknik: string; rentang_tahun: number[]; batas_target: number; maks_per_kategori: number;

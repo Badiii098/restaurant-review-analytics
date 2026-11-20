@@ -22,7 +22,7 @@ def _kalimat_realisasi(f: dict) -> str:
     if not s["restoran"]:
         return ("Nama kedelapan restoran beserta jumlah ulasan yang tersedia ditetapkan setelah "
                 "pengambilan data dengan prosedur di atas, dan dilaporkan pada Bab IV.")
-    kurang = [r for r in s["restoran"] if r["tersedia"] < s["batas_target"]]
+    kurang = [r for r in s["restoran"] if r["tersedia"] is not None and r["tersedia"] < s["batas_target"]]
     teks = (f"Penerapan kriteria pada data yang terkumpul menghasilkan {len(s['restoran'])} restoran "
             f"dengan target total {angka(s['target_total'])} ulasan sebagaimana Tabel 3.1, Gambar 3.6, dan Gambar 3.7.")
     if kurang:
@@ -53,7 +53,7 @@ def blok() -> list[tuple]:
     ("gambar", "3.6", 14),
     ("gambar", "3.7", 14),
     ("h3", "Anotasi Data"),
-    ("p", "Data latih diperoleh melalui anotasi **500 ulasan** yang diambil secara acak berstrata dari kedelapan restoran. Dua anotator melabeli seluruh 500 ulasan yang sama secara terpisah, dengan satu baris per pasangan ulasan dan aspek. Panduan anotasi memuat taksonomi lima aspek pada Tabel 2.1, tiga kelas sentimen, dan aturan keputusan untuk kasus sulit, misalnya keluhan berbentuk harapan dinilai negatif."),
+    ("p", "Data latih diperoleh melalui anotasi **500 ulasan** yang diambil secara acak berstrata proporsional menurut restoran dari ulasan kedelapan restoran sampel. Dua anotator melabeli seluruh 500 ulasan yang sama secara terpisah, dengan satu baris per pasangan ulasan dan aspek. Panduan anotasi memuat taksonomi lima aspek pada Tabel 2.1, tiga kelas sentimen, dan aturan keputusan untuk kasus sulit, misalnya keluhan berbentuk harapan dinilai negatif."),
     ("p", "Kesepakatan antar-anotator diukur dengan koefisien kappa Cohen pada dua tingkat sebagaimana persamaan (3.2): tingkat aspek, sebagai penandaan ada atau tidak ada untuk setiap pasangan ulasan dan aspek, dan tingkat sentimen, hanya pada pasangan yang ditandai oleh kedua anotator. *Pₒ* adalah proporsi kesepakatan teramati dan *Pₑ* proporsi kesepakatan yang diharapkan karena kebetulan. Nilai κ ditafsirkan menurut Landis dan Koch; label yang berbeda diselesaikan melalui diskusi sebelum data dipakai untuk pelatihan."),
     ("rumus", "κ = (Pₒ − Pₑ) / (1 − Pₑ)", "3.2"),
     ("h3", "Perancangan dan Pembangunan Sistem dengan SDLC Prototipe"),
@@ -88,7 +88,7 @@ def blok() -> list[tuple]:
     ("p", "Hipotesis rumusan masalah ketiga diuji dengan uji peringkat bertanda Wilcoxon satu sampel pada persamaan (3.4), dengan *dᵢ* = ρᵢ − 0,60 untuk setiap restoran dan *R*(|*dᵢ*|) peringkat nilai mutlaknya. H0 ditolak bila nilai p satu sisi kurang dari 0,05. Uji ini dipilih karena ρ per restoran tidak dapat diasumsikan berdistribusi normal dan jumlah aspek terlalu sedikit untuk uji per restoran."),
     ("rumus", "W⁺ = Σ R(|dᵢ|)  untuk semua dᵢ > 0", "3.4"),
     ("h2", "Alat dan Bahan Penelitian"),
-    ("p", "Alat penelitian terdiri atas perangkat keras dan perangkat lunak pada Tabel 3.6. Seluruh pelatihan berjalan pada prosesor tanpa kartu grafis, dan versi pustaka Python serta JavaScript dikunci pada berkas kebutuhan agar lingkungan dapat dibangun ulang."),
+    ("p", "Alat penelitian terdiri atas perangkat keras dan perangkat lunak pada Tabel 3.6. Seluruh pelatihan berjalan pada prosesor tanpa kartu grafis, versi minimum pustaka Python dicatat pada berkas kebutuhan, versi pustaka JavaScript dikunci pada berkas kunci paket, dan versi yang benar-benar terpasang dicatat saat pengujian agar lingkungan dapat dibangun ulang."),
     ("tabel", "3.6"),
     ("p", "Bahan penelitian disajikan pada Tabel 3.7."),
     ("tabel", "3.7"),

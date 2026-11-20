@@ -134,3 +134,31 @@ def test_skrip_pilih_restoran_menulis_kolom_sampel(tmp_path: Path) -> None:
     assert len(sampel) == 8
     assert all(int(r["target_sampel"]) <= 625 for r in sampel)
     assert {r["kode"] for r in sampel} >= {"r12", "r11"}
+
+
+# --- Temuan tinjauan akhir ----------------------------------------------------
+from rra.io_layer.scope import ambil_berstrata, ringkas_sampel  # noqa: E402
+
+
+def test_sampel_ditetapkan_tanpa_data_mentah_memakai_target_tersimpan(tmp_path: Path) -> None:
+    baris = ["kode,nama,kota,kategori,target_ulasan,aktif,sampel,target_sampel"]
+    baris += [f"r{i:02d},R{i},Jakarta,K{i},280,1,{1 if i <= 8 else 0},{300 if i <= 8 else ''}" for i in range(1, 11)]
+    daftar = tmp_path / "restaurants.csv"
+    daftar.write_text("\n".join(baris) + "\n", encoding="utf-8")
+    hasil = ringkas_sampel(daftar, tmp_path / "tidak-ada", n=8, rentang=(2021, 2026),
+                           maks_per_kategori=2, batas=625)
+    assert hasil["ditetapkan"] is True
+    assert [r["target"] for r in hasil["restoran"]] == [300] * 8
+    assert all(r["tersedia"] is None for r in hasil["restoran"])
+    assert hasil["target_total"] == 2400
+
+
+def test_ambil_berstrata_proporsional_dan_lengkap() -> None:
+    import pandas as pd
+
+    frame = pd.DataFrame({"review_id": range(1000),
+                          "restaurant": ["A"] * 600 + ["B"] * 300 + ["C"] * 100})
+    hasil = ambil_berstrata(frame, 500, "restaurant", seed=42)
+    assert len(hasil) == 500 and hasil["review_id"].is_unique
+    assert hasil["restaurant"].value_counts().to_dict() == {"A": 300, "B": 150, "C": 50}
+    assert ambil_berstrata(frame, 500, "restaurant", seed=42)["review_id"].tolist() == hasil["review_id"].tolist()

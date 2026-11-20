@@ -77,23 +77,15 @@ def status(cfg: Config) -> dict:
 def data(cfg: Config) -> dict:
     import pandas as pd  # noqa: PLC0415
 
-    from rra.io_layer.scope import (  # noqa: PLC0415
-        hitung_ulasan_dalam_rentang, load_active_restaurants, load_sample, pilih_sampel,
-        target_per_restoran,
-    )
+    from rra.io_layer.scope import load_active_restaurants, ringkas_sampel  # noqa: PLC0415
 
     daftar = cfg.root / "config" / "restaurants.csv"
     kandidat = load_active_restaurants(daftar) if daftar.exists() else []
-    n = int(cfg.get("sampling.n_restoran", 8))
-    rentang = tuple(int(t) for t in cfg.get("sampling.rentang_tahun", [2021, 2026]))
-    batas = int(cfg.get("sampling.batas_target", 625))
-    jumlah = hitung_ulasan_dalam_rentang(cfg.path("paths.raw") / "maps", rentang)
-    ditetapkan = load_sample(daftar) if daftar.exists() else []
-    terpilih = ditetapkan or (pilih_sampel(kandidat, jumlah, n, int(cfg.get(
-        "sampling.maks_per_kategori", 2))) if jumlah else [])
-    sampel = [{"kode": r["kode"], "nama": r.get("nama", ""), "kota": r.get("kota", ""),
-               "kategori": r.get("kategori", ""), "tersedia": jumlah.get(r["kode"], 0),
-               "target": target_per_restoran(jumlah.get(r["kode"], 0), batas)} for r in terpilih]
+    sampel = ringkas_sampel(
+        daftar, cfg.path("paths.raw") / "maps", n=int(cfg.get("sampling.n_restoran", 8)),
+        rentang=tuple(int(t) for t in cfg.get("sampling.rentang_tahun", [2021, 2026])),
+        maks_per_kategori=int(cfg.get("sampling.maks_per_kategori", 2)),
+        batas=int(cfg.get("sampling.batas_target", 625)))
 
     ulasan: dict[str, Any] = {"total": 0, "per_restoran": {}, "rating": {}, "tahun": {}}
     berkas = cfg.path("paths.reviews_file")
@@ -113,11 +105,11 @@ def data(cfg: Config) -> dict:
             "langkah": "python -m rra.cli sample-data --n 2000 atau scripts/import_reviews.py",
             "data_contoh": bool(meta.get("data_contoh", False)),
             "kandidat": len(kandidat),
-            "sampling": {"n": n, "teknik": cfg.get("sampling.teknik", "purposive"),
-                         "rentang_tahun": list(rentang), "batas_target": batas,
-                         "maks_per_kategori": int(cfg.get("sampling.maks_per_kategori", 2)),
-                         "ditetapkan": bool(ditetapkan), "restoran": sampel,
-                         "target_total": sum(s["target"] for s in sampel),
+            "sampling": {"n": sampel["n"], "teknik": cfg.get("sampling.teknik", "purposive"),
+                         "rentang_tahun": sampel["rentang"], "batas_target": sampel["batas_target"],
+                         "maks_per_kategori": sampel["maks_per_kategori"],
+                         "ditetapkan": sampel["ditetapkan"], "restoran": sampel["restoran"],
+                         "target_total": sampel["target_total"],
                          "langkah": "python scripts/pilih_restoran.py --tulis"},
             "ulasan": ulasan}
 
@@ -156,7 +148,7 @@ def kebutuhan(cfg: Config) -> dict:
         kasus.append({**c, "hasil": hasil})
     return {"status": SELESAI, "persen_terlacak": persen_terlacak(katalog),
             "junit_tersedia": junit is not None,
-            "langkah": "PYTHONPATH=src pytest tests --junitxml=reports/pytest.xml",
+            "langkah": "python -m pytest tests --junitxml=reports/pytest.xml",
             "kebutuhan": katalog.kebutuhan, "kasus": kasus}
 
 
@@ -251,7 +243,7 @@ def pengujian(cfg: Config) -> dict:
         hasil_kasus = (junit or {}).get("per_kasus", {}).get(c["kode"], "belum_dijalankan")
         per_tingkat.setdefault(c["tingkat"], Counter())[hasil_kasus] += 1
     return {"status": SELESAI if junit else BELUM,
-            "langkah": "PYTHONPATH=src pytest tests --junitxml=reports/pytest.xml && "
+            "langkah": "python -m pytest tests --junitxml=reports/pytest.xml ; "
                        "python -m rra.cli benchmark --repeat 5",
             "junit": junit, "per_tingkat": {k: dict(v) for k, v in per_tingkat.items()},
             "benchmark": benchmark}
