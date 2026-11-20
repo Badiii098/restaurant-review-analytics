@@ -325,6 +325,7 @@ def write_dataset(dataset: GeneratedDataset, root: str | Path) -> dict[str, Path
     with open(meta_path, "w", encoding="utf-8") as handle:
         json.dump(
             {
+                "data_contoh": True,
                 "seed": dataset.seed,
                 "n_reviews": dataset.n_reviews,
                 "n_labels": len(dataset.labels),

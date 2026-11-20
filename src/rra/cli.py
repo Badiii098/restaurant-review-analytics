@@ -92,6 +92,9 @@ def _build_parser() -> argparse.ArgumentParser:
                             help="Evaluasi kinerja komponen model.")
     p_eval.add_argument("--folds", type=int, default=None, help="Jumlah lipatan validasi silang.")
     p_eval.add_argument("--out", default=None, help="Berkas JSON keluaran evaluasi.")
+    p_eval.add_argument("--iterasi", type=int, default=None,
+                        help="Catat hasil sebagai iterasi prototipe ke-N (reports/iterasi/).")
+    p_eval.add_argument("--catatan", default="", help="Catatan perbaikan pada iterasi ini.")
 
     p_bench = sub.add_parser("benchmark", parents=[common],
                              help="Ukur kinerja non-fungsional.")
@@ -312,7 +315,28 @@ def cmd_evaluate(args: argparse.Namespace, cfg: Config) -> int:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Hasil evaluasi ditulis: {target}")
+    if args.iterasi is not None:
+        from rra.iterations import simpan_iterasi  # noqa: PLC0415
+
+        meta_path = cfg.path("paths.reference") / "dataset_meta.json"
+        meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+        berkas = simpan_iterasi(results[names[0]], args.iterasi, args.catatan,
+                                cfg.path("paths.reports") / "iterasi",
+                                data_contoh=bool(meta.get("data_contoh", False)),
+                                commit=_commit_singkat())
+        print(f"Iterasi {args.iterasi} dicatat: {berkas}")
     return 0
+
+
+def _commit_singkat() -> str | None:
+    import subprocess  # noqa: PLC0415
+
+    try:
+        hasil = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True,
+                               text=True, timeout=5, check=False, cwd=Path(__file__).parent)
+    except OSError:
+        return None
+    return hasil.stdout.strip() or None
 
 
 def cmd_benchmark(args: argparse.Namespace, cfg: Config) -> int:
