@@ -1,0 +1,109 @@
+@import "./tokens.css";
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; background: var(--canvas); color: var(--ink); font: 15px/1.55 var(--font); }
+a { color: var(--accent); }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+h1, h2, h3 { line-height: 1.25; margin: 0; }
+
+.shell { display: grid; grid-template-columns: 272px minmax(0, 1fr); min-height: 100vh; }
+.sidebar { background: var(--surface); border-right: 1px solid var(--rule); padding: 22px 18px;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.brand { display: flex; gap: 10px; align-items: center; margin-bottom: 22px; }
+.brand-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+.brand b { display: block; font-size: 14px; }
+.brand span { color: var(--secondary); font-size: 12px; }
+.tahap-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px 6px; }
+.tahapan { list-style: none; margin: 0; padding: 0; position: relative; }
+.tahapan::before { content: ""; position: absolute; left: 17px; top: 14px; bottom: 14px; width: 2px; background: var(--rule-soft); }
+.tahapan a { position: relative; display: flex; gap: 12px; align-items: center; padding: 7px 8px; border-radius: 8px;
+  color: var(--ink); text-decoration: none; font-size: 14px; }
+.tahapan a:hover { background: var(--hover); }
+.tahapan a.active { background: var(--accent-tint); color: var(--accent-deep); font-weight: 600; }
+.tahapan .no { z-index: 1; flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--rule);
+  background: var(--surface); font-size: 10.5px; display: grid; place-items: center; color: var(--secondary); font-weight: 600; }
+.tahapan a.active .no { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.sidebar-foot { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--rule-soft); color: var(--secondary); font-size: 12px; }
+
+.konten { min-width: 0; padding: 28px clamp(16px, 4vw, 44px) 64px; max-width: 1180px; width: 100%; }
+.kepala { margin-bottom: 20px; }
+.kepala .eyebrow { color: var(--accent); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.kepala h1 { font-size: 26px; margin: 4px 0 6px; }
+.kepala p { color: var(--secondary); margin: 0; max-width: 72ch; }
+
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.kartu { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); min-width: 0; }
+.kartu h2 { font-size: 15px; margin-bottom: 12px; }
+.kartu .sub { color: var(--secondary); font-size: 13px; margin: -8px 0 12px; }
+.stat b { display: block; font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.stat span { color: var(--secondary); font-size: 13px; }
+.mt { margin-top: 16px; }
+
+.tabel-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 600;
+  padding: 8px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+td { padding: 9px 10px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--hover); }
+.kecil { font-size: 12.5px; color: var(--secondary); }
+
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.chip.lulus, .chip.selesai, .chip.tolak { background: var(--good-bg); color: var(--good); }
+.chip.gagal { background: var(--bad-bg); color: var(--bad); }
+.chip.netral { background: var(--track); color: var(--secondary); }
+.chip.tunggu { background: var(--amber-bg); color: var(--amber-ink); border: 1px solid var(--amber-rule); }
+
+.belum { border: 1px dashed var(--amber-rule); background: var(--amber-bg); color: var(--amber-ink); border-radius: var(--radius); padding: 14px 16px; }
+.belum code { display: block; margin-top: 8px; padding: 8px 10px; background: var(--surface); border-radius: 6px; color: var(--ink); overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+.peringatan { border-left: 3px solid var(--amber-ink); background: var(--amber-bg); color: var(--amber-ink); padding: 10px 14px; border-radius: 6px; font-size: 13.5px; margin-bottom: 16px; }
+
+.bar-track { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; min-width: 80px; }
+.bar-fill { height: 100%; border-radius: 4px; background: var(--series-1); }
+.progres { height: 10px; border-radius: 5px; background: var(--track); overflow: hidden; }
+.progres > div { height: 100%; background: var(--accent); border-radius: 5px; }
+
+.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.chart text { fill: var(--secondary); font-size: 11.5px; font-family: var(--font); }
+.chart .lbl { fill: var(--ink); }
+.chart .grid-line { stroke: var(--rule-soft); }
+.chart .ref { stroke: var(--bad); stroke-dasharray: 4 3; stroke-width: 1.5; }
+.chart .hit:hover + .mark, .chart .mark:hover { opacity: .8; }
+.legenda { display: flex; gap: 16px; font-size: 12.5px; color: var(--secondary); margin-bottom: 8px; flex-wrap: wrap; }
+.legenda i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+.tombol { appearance: none; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); border-radius: 8px;
+  padding: 8px 14px; font: 600 14px var(--font); cursor: pointer; }
+.tombol:disabled { opacity: .6; cursor: progress; }
+.tombol.garis { background: transparent; color: var(--accent); }
+
+.alur { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.alur a { display: block; text-decoration: none; color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; background: var(--inset); }
+.alur a:hover { border-color: var(--accent); }
+.alur small { color: var(--secondary); display: block; }
+.h-kartu { border-left: 3px solid var(--rule); }
+.h-kartu.tolak { border-left-color: var(--good); }
+.h-kartu.tidak { border-left-color: var(--bad); }
+.dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 13.5px; margin: 0; }
+.dl dt { color: var(--secondary); }
+.dl dd { margin: 0; }
+.galat { color: var(--bad); }
+.menu-toggle { display: none; }
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--rule); padding: 14px 16px; }
+  .sidebar.tertutup .tahapan, .sidebar.tertutup .tahap-label, .sidebar.tertutup .sidebar-foot { display: none; }
+  .brand { margin-bottom: 10px; justify-content: space-between; }
+  .menu-toggle { display: inline-block; }
+  .grid-2, .grid-3, .alur { grid-template-columns: minmax(0, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat b { font-size: 21px; }
+  .konten { min-width: 0; padding: 20px 16px 48px; }
+}
+@media (min-width: 901px) and (max-width: 1150px) { .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
