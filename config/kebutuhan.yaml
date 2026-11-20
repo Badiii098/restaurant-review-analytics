@@ -16,7 +16,7 @@ kebutuhan:
   - {kode: FR-08, uraian: "Menguji sensitivitas bobot dan kesesuaian dengan pakar", kriteria: "Enam skenario sensitivitas; ρ per restoran dan uji Wilcoxon", kasus: [U-07, U-08, U-12]}
   - {kode: KNF-01, uraian: "Waktu analisis 1.000 ulasan", kriteria: "Rata-rata ≤ 60 detik dari lima ulangan", kasus: [N-01]}
   - {kode: KNF-02, uraian: "Berjalan tanpa jaringan", kriteria: "Halaman dan analisis ulang berjalan dengan jaringan dimatikan", kasus: [N-02]}
-  - {kode: KNF-03, uraian: "Latency muat halaman", kriteria: "≤ 3 detik sampai peringkat tampil", kasus: [N-03]}
+  - {kode: KNF-03, uraian: "Waktu muat halaman", kriteria: "≤ 3 detik sampai peringkat tampil", kasus: [N-03]}
   - {kode: KNF-04, uraian: "Kompatibilitas peramban", kriteria: "Tampil benar di Chrome, Firefox, Edge", kasus: [N-04]}
   - {kode: KNF-05, uraian: "Lingkungan", kriteria: "Uji lulus di Python 3.11 dan 3.12 serta perangkat uji yang dicatat", kasus: [N-05]}
 
