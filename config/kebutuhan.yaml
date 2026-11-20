@@ -13,7 +13,7 @@ kebutuhan:
   - {kode: FR-05, uraian: "Mengekstraksi frasa keluhan dominan per aspek", kriteria: "Lima frasa teratas per aspek, dapat ditelusuri ke ulasan", kasus: [U-05]}
   - {kode: FR-06, uraian: "Menyusun rekomendasi tindakan dari frasa pemicu", kriteria: "Setiap rekomendasi memuat aspek, pemicu, tindakan", kasus: [U-06]}
   - {kode: FR-07, uraian: "Menyimpan hasil ke basis data lokal dan menampilkannya di halaman", kriteria: "Halaman memuat hasil terakhir tanpa menghitung ulang", kasus: [S-02, S-03]}
-  - {kode: FR-08, uraian: "Menguji sensitivitas bobot dan kesesuaian dengan pakar", kriteria: "Enam skenario sensitivitas; ρ per restoran dan uji Wilcoxon", kasus: [U-07, U-08]}
+  - {kode: FR-08, uraian: "Menguji sensitivitas bobot dan kesesuaian dengan pakar", kriteria: "Enam skenario sensitivitas; ρ per restoran dan uji Wilcoxon", kasus: [U-07, U-08, U-12]}
   - {kode: KNF-01, uraian: "Waktu analisis 1.000 ulasan", kriteria: "Rata-rata ≤ 60 detik dari lima ulangan", kasus: [N-01]}
   - {kode: KNF-02, uraian: "Berjalan tanpa jaringan", kriteria: "Halaman dan analisis ulang berjalan dengan jaringan dimatikan", kasus: [N-02]}
   - {kode: KNF-03, uraian: "Latency muat halaman", kriteria: "≤ 3 detik sampai peringkat tampil", kasus: [N-03]}
@@ -32,6 +32,7 @@ kasus:
   - {kode: U-09, tingkat: unit, jenis: otomatis, kritis: true, nama: "Cakupan kandidat, pemilihan sampel purposive 8 restoran, laporan kekurangan", berkas: test_data_scope.py}
   - {kode: U-10, tingkat: unit, jenis: otomatis, kritis: true, nama: "Kesepakatan antar-anotator (κ Cohen)", berkas: test_agreement.py}
   - {kode: U-11, tingkat: unit, jenis: otomatis, kritis: true, nama: "Catatan iterasi prototipe dan selisih Macro-F1", berkas: test_iterations.py}
+  - {kode: U-12, tingkat: unit, jenis: otomatis, kritis: true, nama: "Keputusan hipotesis RM1–RM3", berkas: test_hypotheses.py}
   - {kode: U-13, tingkat: unit, jenis: otomatis, kritis: false, nama: "Keterlacakan kebutuhan ke kasus uji", berkas: test_traceability.py}
   - {kode: I-01, tingkat: integrasi, jenis: otomatis, kritis: true, nama: "Validasi silang dan metrik (aspek tanpa dukungan dihitung nol)", berkas: test_evaluate.py}
   - {kode: I-02, tingkat: integrasi, jenis: otomatis, kritis: true, nama: "Alur menyeluruh dan masukan tidak sempurna", berkas: test_pipeline.py}
