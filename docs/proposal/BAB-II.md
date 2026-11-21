@@ -1,0 +1,171 @@
+# BAB II TINJAUAN PUSTAKA
+
+Bab ini menguraikan teori yang menjadi dasar setiap lapis prototipe dan setiap prosedur pengujian, kemudian memetakan penelitian terdahulu untuk menunjukkan posisi penelitian ini.
+
+## Kajian Teoretis
+
+### Analisis Sentimen Berbasis Aspek
+
+Analisis sentimen berbasis aspek (ABSA) adalah analisis sentimen tingkat rinci yang mengenali aspek pada suatu teks beserta opini yang melekat pada aspek tersebut (Hua et al. 2024). Pada ulasan restoran, satu ulasan dapat bernilai positif untuk makanan dan negatif untuk pelayanan sekaligus, sehingga penilaian tingkat dokumen menyembunyikan aspek yang bermasalah.
+
+Tinjauan sistematis atas 727 studi primer menunjukkan bahwa penelitian ABSA bertumpu pada sedikit dataset dan domain; 78,20% pemakaian dataset terpusat pada empat dataset tolok ukur SemEval ulasan restoran dan laptop (Hua et al. 2024). Temuan ini mendorong penelitian pada data lokal di luar tolok ukur, seperti ulasan restoran berbahasa Indonesia.
+
+Pendekatan ABSA dapat dikelompokkan menjadi pendekatan leksikon dan aturan, pembelajaran mesin klasik, dan pembelajaran mendalam. Pembelajaran mendalam menangkap konteks dan ketergantungan antarkata, misalnya *graph convolutional network* yang memanfaatkan ketergantungan sintaksis (Wu dan Li 2023), model transformer yang dilengkapi teknik penjelasan (Perikos dan Diamantopoulos 2024), dan model multibahasa XLM-RoBERTa dengan perhatian berfokus aspek yang mencapai akurasi 91,9% (Rahman et al. 2025). Model transformer umumnya bekerja sebagai kotak hitam, sehingga alasan di balik prediksinya sulit ditelusuri (Perikos dan Diamantopoulos 2024). Penelitian ini memakai pembelajaran mesin klasik karena kontribusinya berada pada rekayasa sistem, sehingga dibutuhkan komponen yang ringan, cepat, dan dapat ditelusuri.
+
+### Aspek Layanan Restoran
+
+Mutu layanan restoran lazim diukur dengan kerangka DINESERV yang menurunkan dimensi mutu layanan ke konteks rumah makan (Stevens et al. 1995). Pada analisis ulasan, dimensi tersebut diterjemahkan menjadi aspek yang dapat dikenali langsung dari teks. Singgalen memakai kerangka SERVQUAL untuk menilai makanan, layanan, dan nilai pada sepuluh restoran Makassar (Singgalen 2023), sedangkan Li et al. memakai lima kategori, yaitu lokasi, rasa, harga, layanan, dan suasana (Li et al. 2023).
+
+Penelitian ini memakai lima aspek yang sama dengan penelitian ABSA restoran Sunda di Bogor, yaitu makanan, pelayanan, harga, suasana, dan fasilitas (Latifah et al. 2026). Kebersihan tidak dijadikan aspek tersendiri; kebersihan area makan dan toilet dimasukkan ke fasilitas, sedangkan bau dan kebersihan ruang dimasukkan ke suasana. Cakupan setiap aspek disajikan pada Tabel 2.1 dan menjadi pedoman anotasi.
+
+**Tabel 2.1** Aspek layanan restoran dan cakupannya
+
+| Aspek | Cakupan | Contoh penanda pada ulasan |
+|---|---|---|
+| Makanan | rasa, porsi, kesegaran, penyajian, variasi menu, suhu hidangan | enak, hambar, porsi kecil, dingin |
+| Pelayanan | keramahan, kecepatan, ketepatan pesanan, perhatian petugas | ramah, lambat, lupa pesanan, cuek |
+| Harga | kewajaran harga, kesesuaian dengan porsi dan mutu, biaya tambahan | mahal, murah, worth it |
+| Suasana | kenyamanan ruang, kebisingan, musik, suhu, aroma | nyaman, berisik, gerah, adem |
+| Fasilitas | parkir, toilet, wifi, colokan, tempat ibadah, kebersihan area umum | parkir susah, toilet kotor, wifi lambat |
+
+*Sumber: Diadaptasi dari Latifah et al. (2026) dan docs/ANOTASI.md*
+
+### Penentuan Sampel dengan Purposive Sampling
+
+*Purposive sampling* adalah teknik penarikan sampel nonprobabilitas yang memilih unit berdasarkan kriteria yang ditetapkan peneliti sesuai tujuan penelitian, bukan berdasarkan pengacakan. Teknik ini sesuai bila populasi tidak memiliki daftar lengkap yang dapat diacak, seperti seluruh restoran di suatu wilayah, dan bila unit yang dibutuhkan harus memiliki sifat tertentu, misalnya ulasan yang cukup banyak. Konsekuensinya, hasil tidak digeneralisasi secara statistik ke seluruh restoran; kesahihan sampel dijaga dengan menuliskan kriteria pemilihan secara eksplisit dan menerapkannya dengan prosedur yang dapat diulang.
+
+Penelitian ini menerapkan dua tahap. Tahap pertama menyusun kandidat restoran berulasan banyak dengan kategori masakan beragam. Tahap kedua memilih sejumlah restoran sampel dengan urutan jumlah ulasan pada periode tertentu dan batas jumlah restoran per kategori agar tidak ada satu jenis masakan yang mendominasi. Untuk data berlabel dipakai pengacakan berstrata proporsional menurut restoran, sehingga setiap restoran terwakili sebanding dengan jumlah ulasannya dan hasil pengacakan dapat diulang melalui benih acak yang tetap.
+
+### Praproses Teks Bahasa Indonesia
+
+Ulasan berbahasa Indonesia memuat singkatan, campur kode, huruf berulang, kesalahan ejaan, dan emoji, sehingga perlu praproses tersendiri. Amalia dan Winarko menemukan bahwa klasifikasi tanpa *stemming* menghasilkan kinerja yang hampir sama bahkan lebih baik daripada klasifikasi dengan *stemming* (Amalia dan Winarko 2021). Karena itu praproses penelitian ini tidak memakai *stemming*.
+
+Praproses dilakukan berurutan: pengubahan ke huruf kecil, penghapusan URL dan tanda khusus, normalisasi kata tidak baku melalui kamus, penyeragaman huruf berulang, dan penanganan negasi dengan menempelkan penanda pada kata sesudahnya, sehingga "tidak enak" menjadi satu token "tidak_enak". Teks kemudian dipecah menjadi klausa pada tanda baca dan kata penghubung pertentangan seperti "tapi" dan "namun". Negasi tidak boleh melintasi batas klausa agar "tidak antre, tapi makanannya enak" tidak menegasikan kata "enak".
+
+Setiap klausa dinilai polaritasnya dengan leksikon terbuka domain restoran. Leksikon ini tidak menggantikan model; ia hanya menyaring klausa bernada keluhan sebagai bahan frasa keluhan, sehingga kata pujian pada klausa lain tidak ikut terhitung sebagai keluhan.
+
+### Pembobotan TF-IDF
+
+*Term frequency–inverse document frequency* (TF-IDF) mengubah teks menjadi vektor dengan memberi bobot tinggi pada kata yang sering muncul pada suatu dokumen tetapi jarang muncul pada seluruh korpus. Bobot dihitung dengan persamaan (2.1).
+
+`w(t,d) = (1 + log tf(t,d)) × log(N / df(t))`  **(2.1)**
+
+Dengan *w*(*t*,*d*) adalah bobot kata *t* pada dokumen *d*, *tf* adalah frekuensi kata pada dokumen, *N* adalah jumlah dokumen, dan *df* adalah jumlah dokumen yang memuat kata *t*. Bentuk 1 + log *tf* adalah pembobotan sublinear yang meredam kata yang diulang-ulang dalam satu ulasan. Penelitian ini memakai maksimum 20.000 fitur, n-gram satu sampai dua kata, frekuensi dokumen minimum dua, dan frekuensi dokumen maksimum 0,95. N-gram dua kata menangkap frasa seperti "pelayanan lambat". TF-IDF telah dipakai bersama SVM pada ulasan restoran Indonesia (Firdaus et al. 2024; Salsabillah et al. 2024) dan bersama jaringan saraf tiruan (Brata et al. 2024).
+
+### Support Vector Machine
+
+Support Vector Machine (SVM) mencari bidang pemisah dengan margin terbesar antara dua kelas. SVM linear menyelesaikan persoalan optimasi pada persamaan (2.2) dan mengklasifikasikan dokumen dengan fungsi keputusan pada persamaan (2.3).
+
+`min ½‖w‖² + C Σ ξᵢ   dengan   yᵢ(wᵀxᵢ + b) ≥ 1 − ξᵢ,  ξᵢ ≥ 0`  **(2.2)**
+
+`f(x) = sign(wᵀx + b)`  **(2.3)**
+
+Dengan *w* adalah vektor bobot, *b* bias, *x* vektor TF-IDF ulasan, *y* label kelas, *ξ* variabel kelonggaran, dan *C* parameter penalti. Klasifikasi aspek bersifat multi-label, sehingga dipakai strategi satu-lawan-semua: satu pengklasifikasi biner per aspek dengan ambang keyakinan 0,5. Sentimen per aspek diklasifikasikan ke tiga kelas. Bobot kelas diseimbangkan karena ulasan negatif jauh lebih sedikit daripada ulasan positif. Karena SVM tidak menghasilkan peluang secara langsung, tingkat keyakinan diturunkan dari nilai fungsi keputusan melalui fungsi sigmoid.
+
+SVM dipilih sebagai satu-satunya komponen klasifikasi karena tiga alasan. Pertama, SVM konsisten memberi hasil terbaik pada ulasan restoran Indonesia, yaitu 92% (Firdaus et al. 2024), 92,74% dibandingkan 91,67% pada Naive Bayes (Salsabillah et al. 2024), dan 0,9289 dibandingkan 0,8340 pada Naive Bayes (Saputra dan Suria 2025). Kedua, SVM linear tidak memerlukan kartu grafis dan cepat dilatih ulang. Ketiga, bobot fitur SVM linear dapat diperiksa, sehingga kesalahan klasifikasi dapat ditelusuri ke kata tertentu. Karena perbandingan algoritma telah dilakukan penelitian terdahulu, penelitian ini tidak membandingkan model.
+
+### Skor Prioritas Komposit dan Frasa Keluhan Dominan
+
+Skor prioritas mengubah hasil klasifikasi menjadi urutan aspek yang perlu diperbaiki. Skor disusun dari tiga komponen yang masing-masing menjawab satu pertanyaan: seberapa sering aspek dikeluhkan, seberapa berat keluhannya, dan seberapa beragam bentuk keluhannya. Volume dan keragaman dinormalisasi min–max dengan persamaan (2.4), sedangkan keparahan dihitung dari rating bintang dengan persamaan (2.5).
+
+`x′ = (x − min x) / (max x − min x)`  **(2.4)**
+
+`Keparahan(a) = (1 / nₐ) Σ (5 − rᵢ) / 4`  **(2.5)**
+
+`Prioritas(a) = 0,4·Volume(a) + 0,4·Keparahan(a) + 0,2·Keragaman(a)`  **(2.6)**
+
+Volume(*a*) adalah jumlah ulasan negatif pada aspek *a*, Keragaman(*a*) adalah jumlah frasa keluhan unik pada aspek *a*, *nₐ* adalah jumlah ulasan negatif aspek *a*, dan *rᵢ* adalah rating bintang ulasan ke-*i*. Keparahan diturunkan dari rating, bukan dari model, sehingga kesalahan klasifikasi tidak merambat ke bobot keparahan. Keparahan tidak dinormalisasi ulang karena sudah berada pada rentang 0–1 dan makna mutlaknya perlu dipertahankan. Skor pada persamaan (2.6) bernilai 0–1 dan ditampilkan dikalikan 100. Bobot 0,4, 0,4, dan 0,2 ditetapkan peneliti dan diuji sensitivitasnya dengan menggeser setiap bobot ±10%.
+
+Frasa keluhan dominan adalah n-gram satu sampai tiga kata yang paling sering muncul pada klausa bernada keluhan di setiap aspek, dengan frekuensi minimum tiga dan lima frasa teratas per aspek. Istilah "dominan" dipakai, bukan "akar masalah", karena frekuensi menunjukkan kemenonjolan, bukan sebab-akibat. Penelitian terdahulu menyusun akar masalah melalui analisis manual dan diskusi dengan pemangku kepentingan (Firdaus et al. 2024; Salsabillah et al. 2024); penelitian ini menggantinya dengan frasa yang dapat ditelusuri ke ulasan asal dan aturan rekomendasi yang tertulis.
+
+### Arsitektur Berlapis dan Kontrak Antarmuka
+
+Banyak proyek pembelajaran mesin gagal menjadi produk karena sulit diotomasi dan dioperasikan. Kreuzberger et al. merumuskan prinsip *machine learning operations* (MLOps), antara lain otomasi CI/CD, orkestrasi alur kerja, reproduktibilitas, pengelolaan versi data, model, dan kode, pelacakan metadata, pemantauan berkelanjutan, dan umpan balik (Kreuzberger et al. 2023). Prinsip tersebut menuntut komponen yang terpisah dengan antarmuka yang jelas.
+
+Penelitian ini menerapkan prinsip tersebut dalam arsitektur lima lapis. Setiap lapis hanya bertukar data dengan lapis sebelah melalui kontrak data yang didefinisikan di satu berkas. Kontrak membuat setiap lapis dapat diuji terpisah dan mencegah perubahan bentuk data secara diam-diam. Reproduktibilitas dijaga dengan konfigurasi dan benih acak yang disimpan bersama setiap hasil, sedangkan otomasi dijaga dengan pengujian yang berjalan pada setiap perubahan kode.
+
+### Arsitektur Klien-Server, API REST, dan Antarmuka Web
+
+Pada arsitektur klien-server, klien meminta data dan server menjawabnya melalui antarmuka pemrograman aplikasi (*application programming interface*, API). Gaya *representational state transfer* (REST) memodelkan setiap sumber daya dengan alamat tersendiri dan memakai metode HTTP standar, misalnya GET untuk membaca dan POST untuk memicu proses, dengan JSON sebagai format pertukaran data. Pemisahan ini membuat logika analisis di server dan tampilan di klien dapat dikembangkan dan diuji sendiri-sendiri.
+
+Spesifikasi OpenAPI menggambarkan alamat, parameter, dan bentuk respons suatu API dalam satu dokumen yang dapat dibaca mesin. Bila dokumen itu dibangkitkan dari definisi tipe pada kode, bentuk respons pada dokumentasi tidak dapat menyimpang dari kode, sehingga kontrak data antar-lapis tetap menjadi satu sumber kebenaran. Aplikasi web satu halaman (*single-page application*) memuat kerangka halaman sekali, lalu mengambil data dari API untuk setiap tampilan. Bila seluruh berkas aplikasi dibundel bersama server dan tidak mengambil sumber daya dari jaringan luar, aplikasi tetap dapat berjalan tanpa jaringan, yang menjadi salah satu kebutuhan non-fungsional penelitian ini.
+
+Penelitian ini menempatkan API dan aplikasi web pada lapis penyajian. API hanya membaca hasil analisis yang tersimpan dan bukti pengujian, serta menyediakan satu titik akhir untuk menjalankan ulang analisis. Aplikasi web menyajikan satu halaman untuk setiap tahap penelitian, dan bila bukti suatu tahap belum tersedia, halaman menampilkan langkah untuk membuatnya, bukan angka perkiraan.
+
+### Siklus Hidup Pengembangan Perangkat Lunak Model Prototipe
+
+*Software development life cycle* (SDLC) adalah rangkaian tahap pengembangan perangkat lunak, antara lain model air terjun, iteratif, *agile*, *rapid application development*, spiral, dan prototipe (Pressman dan Maxim 2020; Siva et al. 2023). Model air terjun cocok bila kebutuhan sudah tetap sejak awal, sedangkan model prototipe cocok bila kebutuhan baru menjadi jelas setelah pengguna atau peneliti melihat versi awal sistem (Ningsih dan Nurfauziah 2023).
+
+Model prototipe terdiri atas analisis kebutuhan, desain cepat, pembangunan prototipe, evaluasi, dan perbaikan yang diulang sampai prototipe memenuhi kebutuhan (Pressman dan Maxim 2020). Model ini dipakai pada pengembangan aplikasi dasbor berbasis web (Fahrezi dan Prasetyo 2025) dan aplikasi kesehatan yang membutuhkan umpan balik cepat (Molon 2025). Penelitian ini memakai model prototipe karena rumus prioritas, tampilan laporan, dan kebutuhan non-fungsional baru dapat dinilai setelah sistem dijalankan pada data nyata. Model ini ditempatkan pada tahap perancangan sistem dalam tahapan penelitian, dengan dua iterasi.
+
+### Pengujian Perangkat Lunak
+
+Pengujian perangkat lunak dilakukan bertingkat (Pressman dan Maxim 2020; Valerian et al. 2025). Uji unit memeriksa fungsi tunggal secara terpisah, uji integrasi memeriksa pertukaran data antar-komponen, dan uji sistem memeriksa perangkat lunak secara utuh dari sudut pandang pemakai, termasuk sebagai kotak hitam. Pengujian non-fungsional memeriksa sifat di luar fungsi, seperti waktu proses, kemampuan berjalan tanpa jaringan, waktu muat halaman, kompatibilitas peramban, dan lingkungan. Keterlacakan kebutuhan (*requirements traceability*) memastikan setiap kebutuhan terhubung ke minimal satu kasus uji; pada penelitian ini katalog kebutuhan disimpan sebagai satu berkas yang dibaca oleh kode, sehingga proporsi kebutuhan yang terlacak dapat dihitung otomatis, dan setiap uji diberi kode kasus agar statusnya dapat dibaca dari laporan pengujian.
+
+Penelitian ini memakai pytest untuk uji unit, integrasi, dan sistem. Uji sistem mencakup antarmuka baris perintah yang dijalankan sebagai proses terpisah agar benar-benar bersifat kotak hitam, pemanggilan setiap titik akhir API, dan pembukaan setiap halaman aplikasi web pada peramban sungguhan yang dikendalikan perangkat Playwright. Komponen antarmuka diuji tersendiri dengan Vitest. Ambang kebutuhan non-fungsional ditetapkan sebelum pengukuran agar tidak disesuaikan dengan hasil.
+
+### Kesepakatan Anotator dan Uji Statistik
+
+Mutu data berlabel diukur dengan koefisien kappa Cohen pada persamaan (2.7), dengan *pₒ* proporsi kesepakatan teramati dan *pₑ* proporsi kesepakatan karena kebetulan. Nilai kappa 0,61–0,80 ditafsirkan sebagai kesepakatan kuat (Landis dan Koch 1977).
+
+`κ = (pₒ − pₑ) / (1 − pₑ)`  **(2.7)**
+
+Kesesuaian urutan aspek sistem dengan urutan pakar diukur dengan korelasi peringkat Spearman pada persamaan (2.8), dengan *dᵢ* selisih peringkat aspek ke-*i* dan *n* jumlah aspek.
+
+`ρ = 1 − 6 Σ dᵢ² / (n(n² − 1))`  **(2.8)**
+
+Dengan lima aspek hanya terdapat 120 kemungkinan urutan, sehingga pada uji dua sisi α = 0,05 hanya ρ = 1 yang signifikan (p = 0,017), sedangkan ρ = 0,9 belum (p = 0,083). Kriteria ρ ≥ 0,60 dengan p < 0,05 per restoran karenanya praktis hanya terpenuhi bila urutan sistem identik dengan urutan pakar. Keputusan diambil pada tingkat seluruh restoran: nilai ρ dari setiap restoran diuji dengan uji peringkat bertanda Wilcoxon satu sampel terhadap ambang 0,60. Pendekatan agregasi peringkat dari beberapa penilai lazim dipakai pada keputusan rekayasa (Franceschini dan Maisano 2021).
+
+### Metrik Evaluasi Klasifikasi dan Validasi Silang
+
+Kinerja klasifikasi diukur dengan presisi *P*, *recall* *R*, dan F1 per kelas pada persamaan (2.9). Karena kelas aspek dan sentimen tidak seimbang, F1 dirata-ratakan tanpa bobot menjadi Macro-F1 pada persamaan (2.10), sehingga kelas yang jarang berpengaruh sama besar dengan kelas yang sering.
+
+`F1ₖ = 2 · Pₖ · Rₖ / (Pₖ + Rₖ)`  **(2.9)**
+
+`Macro-F1 = (1 / K) Σ F1ₖ`  **(2.10)**
+
+Dengan *K* adalah jumlah kelas. Aspek yang tidak memiliki contoh pada data uji dihitung bernilai nol agar kinerja tidak tampak lebih baik daripada kenyataan; rata-rata atas aspek yang muncul dilaporkan terpisah. Macro-F1 diperoleh dari validasi silang *k* lipatan: data dibagi menjadi *k* bagian per ulasan, setiap bagian bergantian menjadi data uji, dan hasilnya dilaporkan sebagai rata-rata dan simpangan baku antar-lipatan. Pembagian per ulasan mencegah ulasan yang sama muncul pada data latih dan data uji. Pada penelitian rekayasa ini Macro-F1 berperan sebagai bukti pendukung bahwa komponen klasifikasi layak dipakai, dan dicatat pada setiap iterasi prototipe untuk melihat dampak perbaikan.
+
+### Uji Hipotesis, Uji Sensitivitas, dan Perumusan Hipotesis
+
+Hipotesis penelitian dirumuskan sebagai pasangan hipotesis nol (H0) yang menyatakan kriteria tidak terpenuhi dan hipotesis alternatif (H1) yang menyatakan kriteria terpenuhi, dengan taraf signifikansi α = 0,05. Karena kriteria penelitian ini berupa batas, yaitu waktu proses tidak melebihi 60 detik dan median ρ melebihi 0,60, kedua uji dilakukan satu sisi. Bila H0 tidak ditolak, hasil tetap dilaporkan sebagai temuan dan rekomendasi perbaikannya diuraikan.
+
+Waktu proses diuji dengan uji-t satu sampel pada persamaan (2.11), dengan *x̄* rata-rata, *s* simpangan baku, *n* jumlah ulangan, dan *μ₀* batas yang diuji. Uji ini mengandaikan data ulangan mendekati normal, dan karena jumlah ulangan hanya lima, hasilnya dibaca bersama nilai maksimum ulangan.
+
+`t = (x̄ − μ₀) / (s / √n)`  **(2.11)**
+
+Median ρ antar-restoran diuji dengan uji peringkat bertanda Wilcoxon satu sampel pada persamaan (2.12), dengan *dᵢ* = ρᵢ − μ₀ dan *R*(|*dᵢ*|) peringkat nilai mutlaknya. Uji ini tidak mengandaikan distribusi normal. Dengan *n* restoran, nilai p satu sisi terkecil yang dapat dicapai adalah 1/2ⁿ, sehingga pada delapan restoran nilai terkecilnya 1/256 ≈ 0,0039, dan satu atau dua restoran yang tidak sesuai sudah dapat membuat H0 tidak ditolak.
+
+`W⁺ = Σ R(|dᵢ|)  untuk semua dᵢ > 0`  **(2.12)**
+
+Uji sensitivitas memeriksa apakah peringkat aspek bertahan bila bobot skor digeser. Setiap bobot digeser ±10%, bobot lain disesuaikan agar jumlahnya tetap satu, dan peringkat baru dibandingkan dengan peringkat dasar memakai tau Kendall pada persamaan (2.13), dengan *C* pasangan aspek yang urutannya sama dan *D* pasangan yang urutannya terbalik. Nilai satu menunjukkan peringkat tidak berubah.
+
+`τ = (C − D) / (n(n − 1) / 2)`  **(2.13)**
+
+## Penelitian Terdahulu
+
+Penelitian terdahulu yang relevan dirangkum pada Tabel 2.2. Penelitian dengan domain, data, dan metode yang paling dekat adalah Firdaus et al. dan Salsabillah et al., yang sama-sama memakai TF-IDF dan SVM pada ulasan rumah makan Indonesia (Firdaus et al. 2024; Salsabillah et al. 2024).
+
+**Tabel 2.2** Ringkasan penelitian terdahulu
+
+| Peneliti | Objek dan data | Metode | Hasil | Celah terhadap penelitian ini |
+|---|---|---|---|---|
+| Firdaus et al. (2024) | Depot Bamara, 1.029 ulasan Google Review 2021–2022 | TF-IDF + SVM, k-fold, root cause analysis | Akurasi rata-rata 92%; aspek harga 96% | Rekomendasi disusun lewat diskusi dengan pemangku kepentingan, tanpa skor yang dapat diulang |
+| Salsabillah et al. (2024) | Ayam Goreng Nelongso Singosari | SVM dibandingkan Naive Bayes, root cause analysis | SVM 92,74%; Naive Bayes 91,67% | Berhenti pada akurasi dan analisis akar masalah manual |
+| Saputra dan Suria (2025) | Tong Tji Tea House, Google Maps (2.676 positif, 670 netral, 251 negatif) | SVM, Naive Bayes, ensemble soft voting | SVM linear C=10 akurasi 0,9289; ensemble 0,9344 | Tidak ada keluaran prioritas perbaikan |
+| Brata et al. (2024) | 2.065 ulasan Google Review dan Tripadvisor | TF-IDF + ANN, undersampling, GridSearchCV | Akurasi 89%; perankingan ulasan negatif | Peringkat berupa urutan frekuensi, tanpa rumus tersimpan |
+| Latifah et al. (2026) | Lima restoran Sunda Bogor, 3.010 ulasan | Fine-tuning IndoBERT, lima aspek, tiga kelas | Akurasi 92,52–97,51%; F1 makro > 0,91 | Fokus kinerja model; tidak menguji perangkat lunak |
+| Sukwadi et al. (2025) | Restoran cepat saji Indonesia, Google Review dan 100 responden | ABSA, analisis emosi, IPA tiga dimensi | Sebagian besar aspek bersentimen positif | Analisis deskriptif, bukan sistem yang dapat dipakai berulang |
+| Atmojo et al. (2025) | Al-Ghiff Steak Cirebon, Google Maps | IndoBERT, tiga kelas sentimen | Akurasi 83,89% | Sentimen tingkat dokumen, tanpa aspek |
+| Amalia dan Winarko (2021) | Ulasan restoran berbahasa Indonesia | BERT-CNN, ELMo-CNN, Word2vec-CNN | F1 aspek 0,86 (ELMo-CNN); F1 sentimen 0,91 (BERT-CNN) | Model berat; tidak ada keluaran keputusan |
+| Singgalen (2023) | Sepuluh restoran Makassar, Tripadvisor | CRISP-DM dan SERVQUAL | Sentimen terhadap makanan, layanan, nilai | Kerangka penambangan data, bukan rekayasa perangkat lunak |
+| Carrasco dan Dias (2024) | 1.581 restoran Algarve, 880.000 ulasan | ABSA berbasis model transformer, aplikasi web | Metode menyamai klasifikasi manusia | Tidak ada skor prioritas yang dapat diaudit |
+| Li et al. (2023) | Restoran di dua destinasi wisata AS | ABSA lima kategori, conditional survival forest | Sentimen aspek memperbaiki prediksi keberlangsungan restoran | Menegaskan nilai sentimen per aspek, bukan sistem keputusan |
+| Hua et al. (2024) | 727 studi primer dari 8.550 hasil penelusuran | Tinjauan pustaka sistematis ABSA | Kurangnya keragaman dataset dan domain; 78,20% pemakaian dataset pada empat dataset SemEval restoran dan laptop | Menunjukkan perlunya data lokal dan sistem di luar tolok ukur |
+
+*Sumber: Diolah dari publikasi masing-masing (folder REFERENSI)*
+
+Dari Tabel 2.2 terlihat tiga pola. Pertama, penelitian di Indonesia berfokus pada ketepatan model, dari 83,89% dengan IndoBERT (Atmojo et al. 2025) sampai 97,51% dengan *fine-tuning* IndoBERT (Latifah et al. 2026). Kedua, keluaran keputusan berupa rekomendasi manual atau urutan frekuensi (Firdaus et al. 2024; Brata et al. 2024), sedangkan penelitian internasional memakai sentimen aspek untuk prediksi keberlangsungan (Li et al. 2023) dan aplikasi web pengelolaan restoran (Carrasco dan Dias 2024) tanpa skor prioritas yang dapat diaudit. Ketiga, tidak satu pun melaporkan pengujian perangkat lunak dan kinerja non-fungsional.
+
+Karena itu kebaruan penelitian ini tidak diletakkan pada algoritma. Kontribusinya ada pada rekayasa sistem, yaitu arsitektur lima lapis dengan kontrak data yang terdokumentasi dan teruji, skor prioritas yang dapat ditelusuri sampai komponennya dan dibandingkan dengan urutan pakar, serta pengujian perangkat lunak yang terukur sampai kinerja non-fungsional dan keterlacakan setiap kebutuhan ke kasus uji. Bukti setiap tahap tersaji pada aplikasi web, dan keputusan hipotesis dihitung dari bukti tersebut, sehingga hasil dapat diperiksa ulang oleh pihak lain.
+

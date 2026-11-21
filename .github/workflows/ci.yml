@@ -7,8 +7,27 @@ on:
   workflow_dispatch:
 
 jobs:
+  web:
+    name: Klien web (build + vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm --prefix frontend ci
+      - run: npm --prefix frontend test -- --run
+      - run: npm --prefix frontend run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
   uji:
     name: Uji dan verifikasi alur
+    needs: web
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,16 +41,21 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
       - name: Pasang dependensi
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest
+          python -m playwright install --with-deps chromium
 
-      - name: Jalankan seluruh uji
+      - name: Jalankan seluruh uji (unit, integrasi, sistem, peramban)
         env:
           PYTHONPATH: src
-        run: pytest tests -q
+        run: pytest tests -q --junitxml=reports/pytest.xml
 
       - name: Buat data contoh
         env:

@@ -13,7 +13,7 @@ Google Maps untuk penelitian ABSA pada restoran. Skripnya:
 |---|---|
 | Populasi | Ulasan publik berbahasa Indonesia pada restoran di Jabodetabek, terbit 2021–2026 |
 | Kerangka sampel | Restoran dengan **≥ 300 ulasan** publik (agar memungkinkan pengambilan 280 ulasan) |
-| Teknik | **Purposive**: dari 25 restoran kandidat, dipilih **18 restoran** yang ulasannya paling lengkap (Jakarta Pusat 12, Jakarta Selatan 3, Jakarta Utara 1, Bekasi 1, Tangerang 1). Tujuh restoran dikeluarkan (`aktif=0`): r06, r11, r14, r16, r18, r24 karena ulasan terkumpul < 210, dan r20 karena kosong |
+| Teknik | **Purposive dua tahap**: dari 25 restoran kandidat, **18 restoran** lolos syarat awal; dari 18 itu dipilih **8 restoran** sampel dengan `scripts/pilih_restoran.py` (urut jumlah ulasan 2021–2026, maks. 2 per kategori, target = min(tersedia, 625)). Catatan lama: yang ulasannya paling lengkap (Jakarta Pusat 12, Jakarta Selatan 3, Jakarta Utara 1, Bekasi 1, Tangerang 1). Tujuh restoran dikeluarkan (`aktif=0`): r06, r11, r14, r16, r18, r24 karena ulasan terkumpul < 210, dan r20 karena kosong |
 | Target per restoran | **280 ulasan** |
 | Target total | **18 × 280 = 5.040 ulasan** (ambang minimum 5.000); realisasi **6.874 ulasan** |
 | Urutan pengambilan | Urutkan **Terbaru** (*Newest*) agar periode 2021–2026 tercakup, bukan "Paling relevan" |

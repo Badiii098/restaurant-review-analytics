@@ -7,6 +7,8 @@ import pytest
 from rra.decision.priority import AspectStat
 from rra.decision.sensitivity import weight_sensitivity
 
+pytestmark = pytest.mark.kasus("U-07")
+
 
 @pytest.fixture()
 def stats() -> dict[str, AspectStat]:

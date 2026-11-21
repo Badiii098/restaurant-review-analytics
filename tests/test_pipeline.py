@@ -12,6 +12,8 @@ from rra.pipeline import Pipeline, PipelineError
 from rra.report.report import ReportWriter, coverage_frame
 from rra.storage.repository import ResultRepository
 
+pytestmark = pytest.mark.kasus("I-02")
+
 ROOT = Path(__file__).resolve().parents[1]
 
 

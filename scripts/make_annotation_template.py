@@ -29,9 +29,9 @@ COLUMNS = ["review_id", "text", "aspect", "sentiment"]
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--overlap", type=int, default=150,
+    parser.add_argument("--overlap", type=int, default=500,
                         help="Jumlah ulasan yang dilabeli oleh KEDUA pemberi label.")
-    parser.add_argument("--each", type=int, default=400,
+    parser.add_argument("--each", type=int, default=500,
                         help="Jumlah ulasan per pemberi label (termasuk overlap).")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--root", default=str(ROOT))
@@ -48,7 +48,18 @@ def main() -> int:
     total = len(frame)
     needed = min(total, min(args.each * 2 - args.overlap, total))
     rng = random.Random(args.seed)
-    sampled = frame.sample(n=needed, random_state=args.seed).reset_index(drop=True)
+    # Acak berstrata proporsional per restoran, dibatasi pada restoran sampel bila sudah ditetapkan.
+    from rra.io_layer.scope import ambil_berstrata, load_sample  # noqa: PLC0415
+
+    sampel = load_sample(root / "config" / "restaurants.csv") if (root / "config" / "restaurants.csv").exists() else []
+    if sampel and "restaurant" in frame:
+        nama = {r["nama"] for r in sampel}
+        frame = frame[frame["restaurant"].isin(nama)]
+        needed = min(needed, len(frame))
+    if "restaurant" in frame:
+        sampled = ambil_berstrata(frame, needed, "restaurant", seed=args.seed)
+    else:
+        sampled = frame.sample(n=needed, random_state=args.seed).reset_index(drop=True)
 
     overlap_count = min(args.overlap, needed)
     overlap = sampled.iloc[:overlap_count]

@@ -1,0 +1,39 @@
+/* Token warna diturunkan dari scripts/arsip/streamlit/theme.py (Streamlit lama) agar identitas visual tetap.
+   Seri grafik memakai palet tervalidasi dataviz (slot 1 biru, slot 2 oranye). */
+:root {
+  color-scheme: light;
+  --canvas: #f4f5f3; --surface: #ffffff; --inset: #fcfdfb; --hover: #f2f5f2;
+  --ink: #14181a; --secondary: #5c6563; --muted: #7c8583;
+  --rule: #dce1dd; --rule-soft: #eaefea;
+  --accent: #12564a; --accent-deep: #0e443a; --accent-tint: #e8efeb; --on-accent: #ffffff;
+  --amber-ink: #5c4518; --amber-bg: #fcf9f2; --amber-rule: #e8dfc9;
+  --good: #0b7a3e; --good-bg: #e7f4ec; --bad: #b42318; --bad-bg: #fdecea;
+  --series-1: #2a78d6; --series-2: #eb6834; --track: #edf0ee;
+  --radius: 10px; --shadow: 0 1px 2px rgb(20 24 26 / 0.05);
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --canvas: #121514; --surface: #1a1e1d; --inset: #161a19; --hover: #222826;
+    --ink: #eef1ef; --secondary: #b4bcb9; --muted: #8d9693;
+    --rule: #2e3533; --rule-soft: #252b29;
+    --accent: #5fb3a1; --accent-deep: #7cc4b4; --accent-tint: #1f3530; --on-accent: #0b1513;
+    --amber-ink: #e9cf96; --amber-bg: #2a2416; --amber-rule: #4a3f26;
+    --good: #5cc98a; --good-bg: #183224; --bad: #f08a80; --bad-bg: #3a1c19;
+    --series-1: #3987e5; --series-2: #d95926; --track: #262c2a;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #121514; --surface: #1a1e1d; --inset: #161a19; --hover: #222826;
+  --ink: #eef1ef; --secondary: #b4bcb9; --muted: #8d9693;
+  --rule: #2e3533; --rule-soft: #252b29;
+  --accent: #5fb3a1; --accent-deep: #7cc4b4; --accent-tint: #1f3530; --on-accent: #0b1513;
+  --amber-ink: #e9cf96; --amber-bg: #2a2416; --amber-rule: #4a3f26;
+  --good: #5cc98a; --good-bg: #183224; --bad: #f08a80; --bad-bg: #3a1c19;
+  --series-1: #3987e5; --series-2: #d95926; --track: #262c2a;
+  --shadow: none;
+}

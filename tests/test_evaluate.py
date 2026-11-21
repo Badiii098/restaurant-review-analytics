@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from rra.contracts import AspectSentiment, Prediction
 from rra.evaluate import (
     cross_validate,
@@ -11,6 +13,8 @@ from rra.evaluate import (
     sentiment_metrics,
 )
 from rra.models.registry import get_model_class
+
+pytestmark = pytest.mark.kasus("I-01")
 
 
 def test_multilabel_metrics_perfect_prediction() -> None:

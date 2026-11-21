@@ -15,7 +15,7 @@ flowchart LR
     E --> F["05 · Klasifikasi<br/>aspek + sentimen"]
     F --> G["06 · Modul keputusan<br/>frasa, prioritas, aturan"]
     G --> H["Laporan<br/>CSV · Markdown · SQLite"]
-    H --> I["Antarmuka<br/>Streamlit / CLI"]
+    H --> I["Penyajian<br/>API FastAPI → klien React / CLI"]
 
     style A fill:#e8eefc
     style I fill:#e6f4ea

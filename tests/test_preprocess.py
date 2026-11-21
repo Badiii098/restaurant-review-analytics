@@ -7,6 +7,8 @@ import pytest
 from rra.preprocess.cleaner import TextCleaner, ngrams
 from rra.preprocess.resources import CLAUSE_CONNECTORS
 
+pytestmark = pytest.mark.kasus("U-02")
+
 
 @pytest.fixture()
 def cleaner() -> TextCleaner:

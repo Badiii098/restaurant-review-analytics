@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tulis dokumen kontrak antar-lapis (docs/KONTRAK.md) dari src/rra/contracts.py.
+"""Tulis dokumen kontrak antar-lapis (docs/KONTRAK.md) dan skema API (docs/openapi.json).
 
 Dokumen dibangkitkan dari kode, bukan ditulis tangan, sehingga kontrak pada
 naskah (luaran L3) tidak dapat menyimpang dari kontrak yang benar-benar dipakai.
@@ -56,10 +56,23 @@ def render() -> str:
     return "\n".join(lines)
 
 
+def tulis_openapi(target: Path = ROOT / "docs" / "openapi.json") -> Path:
+    """Skema OpenAPI API lapis 5a; respons hasil memakai kontrak ``AspectPriority``."""
+    import json
+
+    from rra.api.app import create_app
+    from rra.config import Config
+
+    skema = create_app(Config.load(root=ROOT)).openapi()
+    target.write_text(json.dumps(skema, indent=2, ensure_ascii=False), encoding="utf-8")
+    return target
+
+
 def main() -> int:
     target = ROOT / "docs" / "KONTRAK.md"
     target.write_text(render(), encoding="utf-8")
     print(f"Ditulis: {target}")
+    print(f"Ditulis: {tulis_openapi()}")
     return 0
 
 

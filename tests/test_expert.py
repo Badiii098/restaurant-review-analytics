@@ -7,6 +7,8 @@ import pytest
 from rra.analysis.expert import spearman_per_restaurant, top1_agreement
 from rra.analysis.expert import uji_median_rho as uji_median
 
+pytestmark = pytest.mark.kasus("U-08")
+
 URUT = ["pelayanan", "makanan", "harga", "suasana", "fasilitas"]
 
 

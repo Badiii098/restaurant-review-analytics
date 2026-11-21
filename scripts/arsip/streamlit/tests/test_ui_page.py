@@ -28,6 +28,8 @@ pytest.importorskip("streamlit.testing.v1")
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
+pytestmark = pytest.mark.kasus("S-03")
+
 
 def _butuh_hasil() -> None:
     if not DB.exists():

@@ -52,3 +52,10 @@ CLAUDE.local.md
 .claude/settings.local.json
 .superpowers/
 artifacts/
+!reports/manual/
+reports/manual/*
+!reports/manual/README.md
+.superpowers/
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo

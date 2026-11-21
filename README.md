@@ -37,7 +37,8 @@ Kontribusi penelitian ini **bukan pada algoritmanya** — ABSA dengan SVM/TF-IDF
 pada ulasan restoran Indonesia sudah terbukti (Firdaus dkk., 2024; Nofandi
 dkk., 2023). Kontribusinya ada pada **rekayasa sistem**, dan tiap klaim di bawah
 punya bukti yang dapat dijalankan. Penelitian memakai satu komponen model
-(TF-IDF + SVM linear) dan data 18 restoran di Jabodetabek.
+(TF-IDF + SVM linear), sampel *purposive* 8 restoran di Jabodetabek, dan
+500 ulasan berlabel dua anotator (κ Cohen).
 
 | Klaim | Bukti di repositori |
 |---|---|
@@ -45,7 +46,10 @@ punya bukti yang dapat dijalankan. Penelitian memakai satu komponen model
 | Modul **skor prioritas eksplisit dan dapat diaudit** (skala tampil 0–100) | `src/rra/decision/priority.py`, komponen skor di `src/rra/storage/repository.py` |
 | **Uji sensitivitas bobot ±10%** | `src/rra/decision/sensitivity.py`, `python -m rra.cli sensitivity` |
 | **Kesesuaian dengan urutan pakar** (ρ per restoran + Wilcoxon) | `src/rra/analysis/expert.py`, `scripts/uji_pakar.py` |
-| **Pengujian rekayasa** unit, integrasi, sistem | `tests/`, `.github/workflows/ci.yml` |
+| **Katalog FR/KNF terlacak 100%** ke kasus uji | `config/kebutuhan.yaml`, `tests/test_traceability.py` |
+| **Pengujian rekayasa** unit, integrasi, sistem, peramban | `tests/`, `frontend/src/**/*.test.tsx`, `.github/workflows/ci.yml` |
+| **Iterasi prototipe 1–2** dengan Macro-F1 tercatat | `src/rra/iterations.py`, `python -m rra.cli evaluate --iterasi N` |
+| **Keputusan hipotesis H1–H3** dihitung dari bukti | `src/rra/analysis/hypotheses.py`, halaman Kesimpulan |
 | Kinerja **non-fungsional terukur** | `scripts/benchmark.py` → `reports/benchmark.json` |
 
 Rincian argumentasi, gap penelitian, dan perbandingan dengan penelitian
@@ -63,6 +67,10 @@ pip install -r requirements.txt
 
 export PYTHONPATH=src
 ```
+
+Di Windows (PowerShell) ganti baris terakhir dengan `$env:PYTHONPATH = "src"`,
+atau pasang paket sekali dengan `pip install -e .` sehingga `python -m rra.cli`
+dan `python -m pytest` berjalan tanpa variabel lingkungan.
 
 Bila memakai [uv](https://docs.astral.sh/uv/):
 
@@ -95,7 +103,27 @@ python scripts/uji_pakar.py --pakar data/reference/urutan_pakar.csv
 Antarmuka pengguna:
 
 ```bash
-streamlit run app/streamlit_app.py
+# sekali: bangun klien web (Node ≥ 22)
+npm --prefix frontend install
+npm --prefix frontend run build
+
+# API + dashboard di http://127.0.0.1:8000 (dokumentasi API: /api/v1/docs)
+python -m rra.cli serve
+```
+
+Pengembangan antarmuka dengan *hot reload*: jalankan `python -m rra.cli serve`
+lalu `npm --prefix frontend run dev` (Vite mem-proxy `/api` ke port 8000).
+
+Dashboard memiliki satu halaman per tahap diagram penelitian: Data, Anotasi,
+Kebutuhan, Desain, Iterasi, Hasil, Pengujian, Validasi Pakar, Kesimpulan.
+Bukti tiap halaman dibuat dengan:
+
+```bash
+python scripts/pilih_restoran.py --tulis                   # sampel 8 restoran (butuh data/raw/maps)
+python -m rra.cli evaluate --iterasi 1 --catatan "awal"     # catatan iterasi prototipe
+python -m rra.cli benchmark --repeat 5                       # KNF-01
+python -m rra.cli sensitivity --out reports/sensitivitas.json
+pytest tests --junitxml=reports/pytest.xml                   # status kasus uji (H1, H2)
 ```
 
 Berkas keluaran ditulis ke:
@@ -115,7 +143,7 @@ python scripts/import_reviews.py --input ~/unduhan/maps_export.csv \
     --text-column reviewText --rating-column stars
 
 # Siapkan berkas kerja anotasi untuk dua pemberi label
-python scripts/make_annotation_template.py --overlap 150 --each 400
+python scripts/make_annotation_template.py --overlap 500 --each 500
 
 # Hitung kesepakatan antar-pemberi label (WAJIB dilaporkan di Bab IV)
 python scripts/compute_kappa.py --first data/reference/anotator_1.csv \
@@ -159,11 +187,12 @@ Keluaran: `data/raw/maps/*.jsonl` (mentah) dan `data/processed/scraping/reviews_
 
 ```
 restaurant-review-analytics/
-├── app/streamlit_app.py          Lapisan 5 — antarmuka pengguna
+├── frontend/                     Lapisan 5b — klien web React + TypeScript (Vite)
 ├── config/
 │   ├── default.yaml              konfigurasi dasar (semua jalur & parameter)
 │   ├── model_svm.yaml            parameter SVM + TF-IDF
-│   └── restaurants.csv           18 restoran aktif (Jabodetabek), target 280 ulasan
+│   ├── kebutuhan.yaml            katalog FR/KNF dan kasus uji (satu sumber)
+│   └── restaurants.csv           kandidat restoran; kolom sampel diisi pilih_restoran.py
 ├── data/
 │   ├── raw/                      data mentah
 │   ├── reference/                data berlabel acuan
@@ -179,6 +208,7 @@ restaurant-review-analytics/
 │   ├── models/                   Lapisan 3 — komponen model (SVM linear)
 │   ├── decision/                 Lapisan 4 — frasa, skor prioritas, aturan, sensitivitas
 │   ├── analysis/                 uji kesesuaian peringkat dengan pakar (RM3)
+│   ├── api/, services/           Lapisan 5a — API FastAPI dan layanan per tahap
 │   ├── evaluate.py               protokol evaluasi (satu sumber angka Bab IV)
 │   ├── pipeline.py               perangkai kelima lapisan
 │   ├── storage/repository.py     penyimpanan hasil & bahan audit
@@ -205,12 +235,18 @@ pytest tests -q
 | `test_models.py` | komponen SVM memenuhi kontrak & memuat metadata tampilan |
 | `test_sensitivity.py` | peringkat stabil terhadap geseran bobot ±10% |
 | `test_expert.py` | ρ Spearman per restoran, uji Wilcoxon, kesesuaian peringkat 1 |
-| `test_data_scope.py` | cakupan 18 restoran, target 5.040 ulasan, laporan kekurangan |
+| `test_data_scope.py` | kandidat aktif, pemilihan sampel purposive 8 restoran, target min(tersedia, 625) |
+| `test_agreement.py` | κ Cohen tingkat aspek dan sentimen |
+| `test_iterations.py` | catatan iterasi prototipe dan selisih Macro-F1 |
+| `test_hypotheses.py` | keputusan H1–H3 dan status "belum tersedia" tanpa bukti |
+| `test_traceability.py` | 100% kebutuhan terlacak ke kasus uji |
 | `test_decision.py` | keparahan, skor prioritas, aturan rekomendasi, frasa keluhan |
 | `test_pipeline.py` | alur menyeluruh & pesan galat yang menuntun |
 | `test_evaluate.py` | kejujuran pelaporan metrik (aspek tanpa dukungan dihitung nol) |
 | `test_cli.py` | antarmuka baris perintah diuji sebagai kotak hitam |
-| `test_ui_components.py`, `test_ui_page.py` | komponen dan halaman antarmuka |
+| `test_api.py` | setiap endpoint API, kesamaan angka dengan basis data, 409 analisis bersamaan |
+| `test_e2e_web.py` | sepuluh halaman di peramban (Playwright) dan KNF-03 ≤ 3 detik |
+| `frontend/src/**/*.test.tsx` | komponen antarmuka (Vitest): skor 0–100, navigasi tahapan |
 
 Hipotesis, kriteria kelulusan, dan kebutuhan non-fungsional:
 [`docs/PENGUJIAN.md`](docs/PENGUJIAN.md).

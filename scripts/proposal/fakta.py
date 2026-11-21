@@ -23,6 +23,24 @@ def _restoran() -> list[dict]:
         return list(csv.DictReader(h))
 
 
+def sampling() -> dict:
+    """Rencana dan realisasi sampel purposive delapan restoran (dari konfigurasi + data)."""
+    import sys
+
+    sys.path.insert(0, str(ROOT / "src"))
+    from rra.config import Config
+    from rra.io_layer.scope import ringkas_sampel
+
+    cfg = Config.load(root=ROOT)
+    n = int(cfg.get("sampling.n_restoran", 8))
+    rentang = tuple(int(t) for t in cfg.get("sampling.rentang_tahun", [2021, 2026]))
+    batas = int(cfg.get("sampling.batas_target", 625))
+    maks = int(cfg.get("sampling.maks_per_kategori", 2))
+    hasil = ringkas_sampel(ROOT / "config" / "restaurants.csv", ROOT / "data" / "raw" / "maps",
+                           n=n, rentang=rentang, maks_per_kategori=maks, batas=batas)
+    return {**hasil, "teknik": cfg.get("sampling.teknik", "purposive")}
+
+
 @lru_cache(maxsize=1)
 def fakta() -> dict:
     semua = _restoran()
@@ -56,6 +74,7 @@ def fakta() -> dict:
         "per_restoran": per_restoran, "kota": dict(kota), "tahun": dict(sorted(tahun.items())),
         "dalam_rentang": dalam, "rating": dict(sorted(rating.items())), "rating_rendah": rendah,
         "restoran_kurang": [p for p in per_restoran if p["kurang"] > 0],
+        "sampling": sampling(),
     }
 
 

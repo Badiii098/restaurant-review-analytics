@@ -76,6 +76,16 @@ evaluation:
   test_size: 0.20            # porsi data uji terpisah (hold-out)
 
 # ---------------------------------------------------------------
+# SAMPEL — purposive sampling delapan restoran dari kandidat aktif
+# ---------------------------------------------------------------
+sampling:
+  n_restoran: 8
+  teknik: purposive
+  rentang_tahun: [2021, 2026]
+  maks_per_kategori: 2
+  batas_target: 625          # target per restoran = min(tersedia, 625)
+
+# ---------------------------------------------------------------
 # LAPISAN 1 — Akuisisi data
 # ---------------------------------------------------------------
 acquisition:

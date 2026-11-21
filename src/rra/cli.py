@@ -92,6 +92,9 @@ def _build_parser() -> argparse.ArgumentParser:
                             help="Evaluasi kinerja komponen model.")
     p_eval.add_argument("--folds", type=int, default=None, help="Jumlah lipatan validasi silang.")
     p_eval.add_argument("--out", default=None, help="Berkas JSON keluaran evaluasi.")
+    p_eval.add_argument("--iterasi", type=int, default=None,
+                        help="Catat hasil sebagai iterasi prototipe ke-N (reports/iterasi/).")
+    p_eval.add_argument("--catatan", default="", help="Catatan perbaikan pada iterasi ini.")
 
     p_bench = sub.add_parser("benchmark", parents=[common],
                              help="Ukur kinerja non-fungsional.")
@@ -103,6 +106,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p_explain = sub.add_parser("explain", parents=[common],
                                help="Tampilkan bahan audit peringkat prioritas.")
     p_explain.add_argument("--db", default=None, help="Berkas basis data hasil (SQLite).")
+
+    p_serve = sub.add_parser("serve", parents=[common],
+                             help="Jalankan API dan dashboard web (http://HOST:PORT).")
+    p_serve.add_argument("--host", default="127.0.0.1", help="Alamat yang didengar.")
+    p_serve.add_argument("--port", type=int, default=8000, help="Port yang didengar.")
 
     p_sens = sub.add_parser("sensitivity", parents=[common],
                             help="Uji sensitivitas bobot prioritas (±10%%).")
@@ -312,7 +320,28 @@ def cmd_evaluate(args: argparse.Namespace, cfg: Config) -> int:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Hasil evaluasi ditulis: {target}")
+    if args.iterasi is not None:
+        from rra.iterations import simpan_iterasi  # noqa: PLC0415
+
+        meta_path = cfg.path("paths.reference") / "dataset_meta.json"
+        meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+        berkas = simpan_iterasi(results[names[0]], args.iterasi, args.catatan,
+                                cfg.path("paths.reports") / "iterasi",
+                                data_contoh=bool(meta.get("data_contoh", False)),
+                                commit=_commit_singkat())
+        print(f"Iterasi {args.iterasi} dicatat: {berkas}")
     return 0
+
+
+def _commit_singkat() -> str | None:
+    import subprocess  # noqa: PLC0415
+
+    try:
+        hasil = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True,
+                               text=True, timeout=5, check=False, cwd=Path(__file__).parent)
+    except OSError:
+        return None
+    return hasil.stdout.strip() or None
 
 
 def cmd_benchmark(args: argparse.Namespace, cfg: Config) -> int:
@@ -347,6 +376,7 @@ def cmd_benchmark(args: argparse.Namespace, cfg: Config) -> int:
         "n_pengulangan": measured,
         "n_ulasan": n_reviews_last,
         "total_detik_rata_rata": round(_stat.mean(elapsed_values), 4),
+        "total_detik_sd": round(_stat.stdev(elapsed_values), 4) if len(elapsed_values) > 1 else 0.0,
         "total_detik_maks": round(max(elapsed_values), 4),
         "latih_detik_rata_rata": round(_stat.mean(train_values), 4),
         "inferensi_detik_rata_rata": round(_stat.mean(inference_values), 4),
@@ -466,7 +496,18 @@ def cmd_sensitivity(args: argparse.Namespace, cfg: Config) -> int:
     return 0
 
 
+def cmd_serve(args: argparse.Namespace, cfg: Config) -> int:
+    import uvicorn  # noqa: PLC0415
+
+    from rra.api.app import create_app  # noqa: PLC0415
+
+    print(f"Dashboard: http://{args.host}:{args.port}  ·  API: http://{args.host}:{args.port}/api/v1/docs")
+    uvicorn.run(create_app(cfg), host=args.host, port=int(args.port), log_level="warning")
+    return 0
+
+
 _COMMANDS = {
+    "serve": cmd_serve,
     "sample-data": cmd_sample_data,
     "run": cmd_run,
     "evaluate": cmd_evaluate,
